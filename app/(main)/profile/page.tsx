@@ -5,23 +5,17 @@ import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/store/authStore';
 import api from '@/lib/api';
 import {
-  Settings,
-  Shield,
-  Bell,
-  BarChart2,
-  HelpCircle,
-  LogOut,
-  ChevronRight,
-  Package,
-  Wallet,
-  Star,
+  Settings, Shield, Bell, BarChart2,
+  HelpCircle, LogOut, ChevronRight,
+  Package, Wallet, Star, Edit, Bookmark,
 } from 'lucide-react';
 
 export default function ProfilePage() {
   const router = useRouter();
   const { user, logout, loadFromStorage } = useAuthStore();
   const [wallet, setWallet] = useState({ balance: 0, locked_balance: 0 });
-  const [stats, setStats] = useState({ orders: 0, reviews: 0 });
+  const [orders, setOrders] = useState<any[]>([]);
+  const [activeTab, setActiveTab] = useState('saved');
 
   useEffect(() => {
     loadFromStorage();
@@ -35,7 +29,7 @@ export default function ProfilePage() {
         api.get('/orders?role=buyer'),
       ]);
       setWallet(walletRes.data);
-      setStats((prev) => ({ ...prev, orders: ordersRes.data.length }));
+      setOrders(ordersRes.data);
     } catch (err) {
       console.error(err);
     }
@@ -46,68 +40,83 @@ export default function ProfilePage() {
     router.push('/login');
   };
 
-  const menuItems = [
+  const menuSections = [
     {
-      section: 'MY ACCOUNT',
+      title: 'MY SAVED',
       items: [
-        { icon: Package, label: 'My Orders', href: '/orders', color: '#EEF2FF', iconColor: '#4F46E5' },
-        { icon: Wallet, label: 'Wallet', href: '/wallet', color: '#F0FDF4', iconColor: '#16A34A' },
-        { icon: Bell, label: 'Notifications', href: '/notifications', color: '#FDF4FF', iconColor: '#9333EA' },
+        { icon: '🏠', label: 'Saved hostels', value: '6 places', href: '/housing' },
+        { icon: '🔧', label: 'Saved services', value: '3 providers', href: '/services' },
+        { icon: '🛍️', label: 'Saved products', value: '9 items', href: '/marketplace' },
       ],
     },
     {
-      section: 'SETTINGS',
+      title: 'ACCOUNT',
       items: [
-        { icon: Shield, label: 'Verification', value: user?.is_verified ? 'Verified' : 'Unverified', color: '#F0FDF4', iconColor: '#16A34A' },
-        { icon: Settings, label: 'Account Settings', color: '#F8FAFC', iconColor: '#64748B' },
-        { icon: HelpCircle, label: 'Help & Support', color: '#F8FAFC', iconColor: '#64748B' },
+        { icon: '✅', label: 'Verification', value: user?.is_verified ? 'Verified' : 'Pending', href: '#', color: user?.is_verified ? '#10B981' : '#F59E0B' },
+        { icon: '🔔', label: 'Notifications', value: '', href: '/notifications' },
+        { icon: '📊', label: 'Seller dashboard', value: '', href: '/seller/listings' },
+        { icon: '❓', label: 'Help & support', value: '', href: '#' },
       ],
     },
   ];
 
   return (
-    <div style={{ background: '#F8FAFC', minHeight: '100vh' }}>
+    <div style={{ maxWidth: '800px' }}>
 
-      {/* Header */}
+      {/* Profile header */}
       <div style={{
-        background: 'linear-gradient(160deg, #3730A3 0%, #4F46E5 60%, #7C3AED 100%)',
-        padding: '24px 20px 60px',
-        position: 'relative',
+        background: 'linear-gradient(135deg, #1E3A8A 0%, #6D28D9 100%)',
+        borderRadius: '20px', padding: '28px',
+        marginBottom: '20px', position: 'relative',
+        overflow: 'hidden',
       }}>
         <div style={{
-          display: 'flex', justifyContent: 'space-between',
-          alignItems: 'flex-start',
-        }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-            {/* Avatar */}
+          position: 'absolute', top: '-40px', right: '-40px',
+          width: '160px', height: '160px',
+          background: 'rgba(255,255,255,0.05)',
+          borderRadius: '50%',
+        }} />
+
+        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
             <div style={{
-              width: '60px', height: '60px',
+              width: '72px', height: '72px',
               background: 'rgba(255,255,255,0.2)',
               borderRadius: '50%',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
-              border: '2px solid rgba(255,255,255,0.3)',
-              fontSize: '24px', fontWeight: '800', color: 'white',
+              border: '3px solid rgba(255,255,255,0.3)',
+              fontSize: '28px', fontWeight: '800', color: 'white',
+              position: 'relative',
             }}>
               {user?.name?.charAt(0).toUpperCase()}
+              <div style={{
+                position: 'absolute', bottom: '2px', right: '2px',
+                width: '16px', height: '16px',
+                background: '#10B981', borderRadius: '50%',
+                border: '2px solid white',
+              }} />
             </div>
             <div>
-              <p style={{ color: 'white', fontWeight: '800', fontSize: '18px', marginBottom: '4px' }}>
+              <h1 style={{ fontSize: '22px', fontWeight: '800', color: 'white', marginBottom: '4px' }}>
                 {user?.name}
-              </p>
-              <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: '13px', marginBottom: '6px' }}>
+              </h1>
+              <p style={{ fontSize: '13px', color: 'rgba(255,255,255,0.6)', marginBottom: '8px' }}>
                 {user?.email}
               </p>
-              <span style={{
-                background: 'rgba(255,255,255,0.15)',
-                border: '1px solid rgba(255,255,255,0.2)',
-                color: 'white', fontSize: '11px',
-                fontWeight: '600', padding: '3px 10px',
-                borderRadius: '20px',
+              <div style={{
+                display: 'inline-flex', alignItems: 'center', gap: '6px',
+                background: 'rgba(16,185,129,0.2)',
+                border: '1px solid rgba(16,185,129,0.3)',
+                borderRadius: '20px', padding: '4px 12px',
               }}>
-                ✓ {user?.role}
-              </span>
+                <Shield size={12} color="#34D399" />
+                <span style={{ fontSize: '11px', fontWeight: '600', color: '#34D399' }}>
+                  Verified Student
+                </span>
+              </div>
             </div>
           </div>
+
           <button style={{
             width: '36px', height: '36px',
             background: 'rgba(255,255,255,0.15)',
@@ -118,140 +127,132 @@ export default function ProfilePage() {
             <Settings size={16} color="white" />
           </button>
         </div>
-      </div>
 
-      {/* Stats card */}
-      <div style={{ padding: '0 16px', marginTop: '-36px', position: 'relative', zIndex: 10 }}>
+        {/* Stats */}
         <div style={{
-          background: 'white', borderRadius: '20px',
-          padding: '20px',
-          boxShadow: '0 8px 32px rgba(0,0,0,0.1)',
-          display: 'grid', gridTemplateColumns: '1fr 1fr 1fr',
-          gap: '0', marginBottom: '16px',
+          display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)',
+          gap: '12px', marginTop: '20px',
         }}>
           {[
-            { value: stats.orders, label: 'ORDERS', icon: Package, color: '#4F46E5' },
-            { value: `₦${wallet.balance.toLocaleString()}`, label: 'BALANCE', icon: Wallet, color: '#16A34A' },
-            { value: wallet.locked_balance > 0 ? `₦${wallet.locked_balance.toLocaleString()}` : '—', label: 'IN ESCROW', icon: Star, color: '#D97706' },
+            { value: orders.length, label: 'BOOKINGS' },
+            { value: `₦${wallet.balance.toLocaleString()}`, label: 'BALANCE' },
+            { value: '96', label: 'TRUST SCORE' },
           ].map((stat, i) => (
             <div key={stat.label} style={{
+              background: i === 2 ? 'rgba(255,255,255,0.2)' : 'rgba(255,255,255,0.1)',
+              borderRadius: '12px', padding: '14px',
               textAlign: 'center',
-              borderRight: i < 2 ? '1px solid #F1F5F9' : 'none',
-              padding: '0 8px',
+              border: i === 2 ? '1px solid rgba(255,255,255,0.2)' : 'none',
             }}>
-              <p style={{
-                fontSize: '20px', fontWeight: '800',
-                color: '#0F172A', marginBottom: '4px',
-              }}>
+              <p style={{ fontSize: '22px', fontWeight: '800', color: 'white', marginBottom: '4px' }}>
                 {stat.value}
               </p>
-              <p style={{ fontSize: '10px', color: '#94A3B8', fontWeight: '700' }}>
+              <p style={{ fontSize: '10px', color: 'rgba(255,255,255,0.5)', letterSpacing: '0.5px' }}>
                 {stat.label}
               </p>
             </div>
           ))}
         </div>
-
-        {/* Become a seller banner */}
-        {user?.role === 'BUYER' && (
-          <div style={{
-            background: 'white', borderRadius: '18px',
-            padding: '16px 20px',
-            boxShadow: '0 2px 12px rgba(0,0,0,0.06)',
-            display: 'flex', alignItems: 'center', gap: '14px',
-            marginBottom: '16px', cursor: 'pointer',
-          }}>
-            <div style={{
-              width: '44px', height: '44px',
-              background: '#EEF2FF', borderRadius: '14px',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              flexShrink: 0,
-            }}>
-              <BarChart2 size={22} color="#4F46E5" />
-            </div>
-            <div style={{ flex: 1 }}>
-              <p style={{ fontWeight: '700', fontSize: '14px', color: '#0F172A', marginBottom: '2px' }}>
-                Become a Seller
-              </p>
-              <p style={{ fontSize: '12px', color: '#64748B' }}>
-                List services or products on UniVerse
-              </p>
-            </div>
-            <ChevronRight size={18} color="#CBD5E1" />
-          </div>
-        )}
-
-        {/* Menu sections */}
-        {menuItems.map((section) => (
-          <div key={section.section} style={{ marginBottom: '16px' }}>
-            <p style={{
-              fontSize: '11px', fontWeight: '700',
-              color: '#94A3B8', marginBottom: '8px',
-              paddingLeft: '4px', letterSpacing: '0.5px',
-            }}>
-              {section.section}
-            </p>
-            <div style={{
-              background: 'white', borderRadius: '18px',
-              overflow: 'hidden',
-              boxShadow: '0 2px 12px rgba(0,0,0,0.06)',
-            }}>
-              {section.items.map((item, i) => (
-                <div
-                  key={item.label}
-                  onClick={() => item.href && router.push(item.href)}
-                  style={{
-                    display: 'flex', alignItems: 'center',
-                    gap: '14px', padding: '14px 16px',
-                    borderBottom: i < section.items.length - 1 ? '1px solid #F8FAFC' : 'none',
-                    cursor: 'pointer',
-                  }}
-                >
-                  <div style={{
-                    width: '36px', height: '36px',
-                    background: item.color, borderRadius: '10px',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    flexShrink: 0,
-                  }}>
-                    <item.icon size={18} color={item.iconColor} />
-                  </div>
-                  <span style={{
-                    flex: 1, fontSize: '14px',
-                    fontWeight: '600', color: '#0F172A',
-                  }}>
-                    {item.label}
-                  </span>
-                  {(item as any).value && (
-                    <span style={{ fontSize: '12px', color: '#16A34A', fontWeight: '600' }}>
-                      {(item as any).value}
-                    </span>
-                  )}
-                  <ChevronRight size={16} color="#CBD5E1" />
-                </div>
-              ))}
-            </div>
-          </div>
-        ))}
-
-        {/* Logout */}
-        <button
-          onClick={handleLogout}
-          style={{
-            width: '100%',
-            background: '#FEF2F2',
-            border: 'none', borderRadius: '16px',
-            padding: '16px',
-            display: 'flex', alignItems: 'center',
-            justifyContent: 'center', gap: '10px',
-            cursor: 'pointer', marginBottom: '8px',
-          }}
-        >
-          <LogOut size={18} color="#DC2626" />
-          <span style={{ fontSize: '15px', fontWeight: '700', color: '#DC2626' }}>
-            Log out
-          </span>
-        </button>
       </div>
+
+      {/* Become a seller */}
+      {user?.role === 'BUYER' && (
+        <div style={{
+          background: 'white', borderRadius: '14px',
+          padding: '16px 20px', border: '1px solid #E2E8F0',
+          display: 'flex', alignItems: 'center', gap: '14px',
+          marginBottom: '16px', cursor: 'pointer',
+          boxShadow: '0 1px 4px rgba(0,0,0,0.04)',
+        }}>
+          <div style={{
+            width: '44px', height: '44px',
+            background: '#EFF6FF', borderRadius: '12px',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            flexShrink: 0,
+          }}>
+            <BarChart2 size={22} color="#1E3A8A" />
+          </div>
+          <div style={{ flex: 1 }}>
+            <p style={{ fontWeight: '700', fontSize: '14px', color: '#0F172A', marginBottom: '2px' }}>
+              Become a Seller
+            </p>
+            <p style={{ fontSize: '12px', color: '#64748B' }}>
+              List housing, services or products
+            </p>
+          </div>
+          <ChevronRight size={18} color="#CBD5E1" />
+        </div>
+      )}
+
+      {/* Menu sections */}
+      {menuSections.map((section) => (
+        <div key={section.title} style={{ marginBottom: '16px' }}>
+          <p style={{
+            fontSize: '11px', fontWeight: '700', color: '#94A3B8',
+            letterSpacing: '0.5px', marginBottom: '8px',
+          }}>
+            {section.title}
+          </p>
+          <div style={{
+            background: 'white', borderRadius: '14px',
+            border: '1px solid #E2E8F0', overflow: 'hidden',
+            boxShadow: '0 1px 4px rgba(0,0,0,0.04)',
+          }}>
+            {section.items.map((item, i) => (
+              <div
+                key={item.label}
+                onClick={() => router.push(item.href)}
+                style={{
+                  display: 'flex', alignItems: 'center',
+                  gap: '14px', padding: '14px 16px',
+                  borderBottom: i < section.items.length - 1 ? '1px solid #F8FAFC' : 'none',
+                  cursor: 'pointer',
+                }}
+                onMouseEnter={(e) => (e.currentTarget.style.background = '#F8FAFC')}
+                onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
+              >
+                <div style={{
+                  width: '36px', height: '36px',
+                  background: '#F8FAFC', borderRadius: '10px',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  flexShrink: 0, fontSize: '18px',
+                }}>
+                  {item.icon}
+                </div>
+                <span style={{ flex: 1, fontSize: '14px', fontWeight: '600', color: '#0F172A' }}>
+                  {item.label}
+                </span>
+                {item.value && (
+                  <span style={{
+                    fontSize: '12px', fontWeight: '600',
+                    color: (item as any).color || '#94A3B8',
+                  }}>
+                    {item.value}
+                  </span>
+                )}
+                <ChevronRight size={16} color="#CBD5E1" />
+              </div>
+            ))}
+          </div>
+        </div>
+      ))}
+
+      {/* Logout */}
+      <button
+        onClick={handleLogout}
+        style={{
+          width: '100%', background: '#FEF2F2',
+          border: '1px solid #FEE2E2', borderRadius: '14px',
+          padding: '16px', display: 'flex',
+          alignItems: 'center', justifyContent: 'center',
+          gap: '10px', cursor: 'pointer',
+        }}
+      >
+        <LogOut size={18} color="#DC2626" />
+        <span style={{ fontSize: '15px', fontWeight: '700', color: '#DC2626' }}>
+          Log out
+        </span>
+      </button>
     </div>
   );
 }

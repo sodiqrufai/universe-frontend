@@ -8,397 +8,436 @@ import {
   Building2,
   Wrench,
   ShoppingBag,
-  Bell,
-  Shield,
+  MessageSquare,
   ArrowRight,
-  Package,
-  Wallet,
+  Shield,
   Star,
+  MapPin,
+  TrendingUp,
 } from 'lucide-react';
 
 export default function DashboardPage() {
   const { user, loadFromStorage } = useAuthStore();
-  const [unreadCount, setUnreadCount] = useState(0);
-  const [stats, setStats] = useState({
-    orders: 0,
-    wallet: 0,
-  });
+  const [wallet, setWallet] = useState({ balance: 0 });
+  const [orders, setOrders] = useState([]);
+  const [listings, setListings] = useState<any[]>([]);
 
   useEffect(() => {
     loadFromStorage();
   }, []);
 
   useEffect(() => {
-    if (user) {
-      fetchData();
-    }
+    if (user) fetchData();
   }, [user]);
+
   const fetchData = async () => {
     try {
-      const [notifRes, walletRes] = await Promise.all([
-        api.get('/notifications/unread-count'),
+      const [walletRes, ordersRes, listingsRes] = await Promise.all([
         api.get('/payments/wallet'),
+        api.get('/orders?role=buyer'),
+        api.get('/marketplace/listings'),
       ]);
-      setUnreadCount(notifRes.data.unread_count);
-      setStats((prev) => ({ ...prev, wallet: walletRes.data.balance }));
+      setWallet(walletRes.data);
+      setOrders(ordersRes.data);
+      setListings(listingsRes.data);
     } catch (err) {
       console.error(err);
     }
   };
 
-  const getGreeting = () => {
-    const hour = new Date().getHours();
-    if (hour < 12) return 'Good morning';
-    if (hour < 17) return 'Good afternoon';
-    return 'Good evening';
-  };
-
-  const categories = [
-    { label: 'Housing', icon: Building2, href: '/housing', color: '#EEF2FF', iconColor: '#4F46E5' },
-    { label: 'Services', icon: Wrench, href: '/services', color: '#F0FDF4', iconColor: '#16A34A' },
-    { label: 'Market', icon: ShoppingBag, href: '/marketplace', color: '#FFF7ED', iconColor: '#EA580C' },
+  const quickCards = [
+    { icon: Building2, label: 'Housing', desc: 'Find the best near-campus stays', href: '/housing', color: '#EFF6FF', iconColor: '#1E3A8A' },
+    { icon: Wrench, label: 'Services', desc: 'Tutors, laundry, and more', href: '/services', color: '#F0FDF4', iconColor: '#10B981' },
+    { icon: ShoppingBag, label: 'Marketplace', desc: 'Buy and sell student gear', href: '/marketplace', color: '#FFF7ED', iconColor: '#F59E0B' },
+    { icon: MessageSquare, label: 'Messages', desc: '3 new campus requests', href: '/messages', color: '#F5F3FF', iconColor: '#6D28D9' },
   ];
 
-  const quickLinks = [
-    { label: 'My Orders', icon: Package, href: '/orders', color: '#EEF2FF', iconColor: '#4F46E5' },
-    { label: 'Wallet', icon: Wallet, href: '/wallet', color: '#F0FDF4', iconColor: '#16A34A' },
-    { label: 'Reviews', icon: Star, href: '/marketplace', color: '#FFFBEB', iconColor: '#D97706' },
-    { label: 'Notifications', icon: Bell, href: '/notifications', color: '#FDF4FF', iconColor: '#9333EA' },
+  const featuredHostels = [
+    { name: 'Blue Horizon Residences', location: '0.5 miles from Main Gate', price: '₦450,000', rating: 4.8, verified: true, image: 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=400&q=80' },
+    { name: "The Scholar's Loft", location: 'Downtown Campus District', price: '₦520,000', rating: 4.9, verified: true, image: 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=400&q=80' },
+    { name: 'Ivy Green Suites', location: 'West Campus Woods', price: '₦480,000', rating: 4.7, verified: true, image: 'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=400&q=80' },
+  ];
+
+  const popularTutors = [
+    { name: 'Sarah J.', role: 'UI/UX Design Specialist', rating: 4.9, reviews: 124, avatar: 'SJ' },
+    { name: 'Dr. Michael Chen', role: 'Calculus & Linear Algebra', rating: 5.0, reviews: 89, avatar: 'MC' },
   ];
 
   return (
-    <div>
-      {/* Hero Header */}
+    <div style={{ maxWidth: '1200px' }}>
+
+      {/* Welcome header */}
       <div style={{
-        background: 'linear-gradient(160deg, #3730A3 0%, #4F46E5 60%, #7C3AED 100%)',
-        padding: '28px 20px 48px',
-        position: 'relative',
-        overflow: 'hidden',
+        display: 'flex', justifyContent: 'space-between',
+        alignItems: 'flex-start', marginBottom: '24px',
       }}>
-        {/* Glow */}
-        <div style={{
-          position: 'absolute', top: '-60px', right: '-60px',
-          width: '200px', height: '200px',
-          background: 'rgba(255,255,255,0.05)',
-          borderRadius: '50%',
-        }} />
-
-        {/* Top row */}
-        <div style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          marginBottom: '24px',
-        }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <div style={{
-              width: '44px', height: '44px',
-              background: 'rgba(255,255,255,0.15)',
-              borderRadius: '50%',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              border: '2px solid rgba(255,255,255,0.2)',
-            }}>
-              <span style={{ color: 'white', fontWeight: '800', fontSize: '16px' }}>
-                {user?.name?.charAt(0).toUpperCase()}
-              </span>
-            </div>
-            <div>
-              <p style={{ color: 'rgba(255,255,255,0.7)', fontSize: '12px' }}>
-                {getGreeting()},
-              </p>
-              <p style={{ color: 'white', fontWeight: '700', fontSize: '16px' }}>
-                Hi, {user?.name?.split(' ')[0]} 👋
-              </p>
-            </div>
-          </div>
-
-          <Link href="/notifications" style={{
-            width: '40px', height: '40px',
-            background: 'rgba(255,255,255,0.15)',
-            borderRadius: '50%',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            position: 'relative', textDecoration: 'none',
-            border: '1px solid rgba(255,255,255,0.2)',
+        <div>
+          <h1 style={{
+            fontSize: '28px', fontWeight: '800',
+            color: '#0F172A', letterSpacing: '-0.5px',
+            marginBottom: '4px',
           }}>
-            <Bell size={18} color="white" />
-            {unreadCount > 0 && (
-              <div style={{
-                position: 'absolute', top: '-2px', right: '-2px',
-                width: '16px', height: '16px',
-                background: '#EF4444',
-                borderRadius: '50%',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                border: '2px solid white',
-              }}>
-                <span style={{ color: 'white', fontSize: '9px', fontWeight: '700' }}>
-                  {unreadCount}
-                </span>
-              </div>
-            )}
-          </Link>
+            Welcome back, {user?.name?.split(' ')[0]} 👋
+          </h1>
+          <p style={{ fontSize: '14px', color: '#64748B' }}>
+            Your campus life, perfectly organized today.
+          </p>
         </div>
-
-        {/* Headline */}
-        <h1 style={{
-          color: 'white', fontWeight: '800',
-          fontSize: '26px', lineHeight: '1.3',
-          letterSpacing: '-0.5px', marginBottom: '20px',
-        }}>
-          What do you need
-          <br />on campus today?
-        </h1>
-
-        {/* Search bar */}
         <div style={{
-          background: 'white',
-          borderRadius: '16px',
-          padding: '14px 16px',
-          display: 'flex',
-          alignItems: 'center',
-          gap: '10px',
-          boxShadow: '0 8px 32px rgba(0,0,0,0.15)',
+          display: 'flex', alignItems: 'center', gap: '8px',
+          background: '#F0FDF4', border: '1px solid #BBF7D0',
+          borderRadius: '20px', padding: '6px 14px',
         }}>
-          <span style={{ fontSize: '18px' }}>🔍</span>
-          <span style={{ color: '#94A3B8', fontSize: '14px' }}>
-            Search housing, services, products...
+          <div style={{
+            width: '8px', height: '8px',
+            background: '#10B981', borderRadius: '50%',
+          }} />
+          <span style={{ fontSize: '12px', fontWeight: '600', color: '#10B981' }}>
+            Verified Student
           </span>
         </div>
       </div>
 
-      {/* Categories */}
+      {/* Quick access cards */}
       <div style={{
-        background: 'white',
-        margin: '-20px 16px 0',
-        borderRadius: '20px',
-        padding: '20px',
-        boxShadow: '0 4px 20px rgba(0,0,0,0.08)',
-        display: 'grid',
-        gridTemplateColumns: '1fr 1fr 1fr',
-        gap: '12px',
-        position: 'relative',
-        zIndex: 10,
+        display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)',
+        gap: '16px', marginBottom: '32px',
       }}>
-        {categories.map((cat) => (
-          <Link
-            key={cat.label}
-            href={cat.href}
-            style={{ textDecoration: 'none' }}
-          >
+        {quickCards.map((card) => (
+          <Link key={card.label} href={card.href} style={{ textDecoration: 'none' }}>
             <div style={{
-              display: 'flex', flexDirection: 'column',
-              alignItems: 'center', gap: '8px',
-              padding: '16px 8px',
-              background: cat.color,
-              borderRadius: '16px',
-              transition: 'transform 0.2s',
-            }}>
-              <cat.icon size={24} color={cat.iconColor} />
-              <span style={{
-                fontSize: '12px', fontWeight: '700',
-                color: '#0F172A',
+              background: 'white', borderRadius: '16px',
+              padding: '20px', border: '1px solid #F1F5F9',
+              boxShadow: '0 1px 4px rgba(0,0,0,0.05)',
+              transition: 'all 0.2s', cursor: 'pointer',
+            }}
+              onMouseEnter={(e) => {
+                (e.currentTarget as HTMLDivElement).style.boxShadow = '0 4px 16px rgba(0,0,0,0.1)';
+                (e.currentTarget as HTMLDivElement).style.transform = 'translateY(-2px)';
+              }}
+              onMouseLeave={(e) => {
+                (e.currentTarget as HTMLDivElement).style.boxShadow = '0 1px 4px rgba(0,0,0,0.05)';
+                (e.currentTarget as HTMLDivElement).style.transform = 'translateY(0)';
+              }}
+            >
+              <div style={{
+                width: '44px', height: '44px',
+                background: card.color, borderRadius: '12px',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                marginBottom: '12px',
               }}>
-                {cat.label}
-              </span>
+                <card.icon size={22} color={card.iconColor} />
+              </div>
+              <p style={{ fontWeight: '700', fontSize: '14px', color: '#0F172A', marginBottom: '4px' }}>
+                {card.label}
+              </p>
+              <p style={{ fontSize: '12px', color: '#94A3B8', lineHeight: '1.4' }}>
+                {card.desc}
+              </p>
             </div>
           </Link>
         ))}
       </div>
 
-      {/* Verified badge */}
-      <div style={{ padding: '16px 16px 0' }}>
-        <div style={{
-          background: 'white',
-          borderRadius: '16px',
-          padding: '16px',
-          display: 'flex',
-          alignItems: 'center',
-          gap: '12px',
-          boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
-        }}>
-          <div style={{
-            width: '40px', height: '40px',
-            background: '#F0FDF4',
-            borderRadius: '12px',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            flexShrink: 0,
-          }}>
-            <Shield size={20} color="#16A34A" />
-          </div>
-          <div style={{ flex: 1 }}>
-            <p style={{ fontWeight: '700', fontSize: '14px', color: '#0F172A', marginBottom: '2px' }}>
-              Verified for students
-            </p>
-            <p style={{ fontSize: '12px', color: '#64748B' }}>
-              Every host, pro and seller is ID-checked.
-            </p>
-          </div>
-          <span style={{
-            fontWeight: '800', fontSize: '16px', color: '#16A34A',
-          }}>
-            99%
-          </span>
-        </div>
-      </div>
-
-      {/* Quick links */}
-      <div style={{ padding: '20px 16px 0' }}>
+      {/* Featured Hostels */}
+      <div style={{ marginBottom: '32px' }}>
         <div style={{
           display: 'flex', justifyContent: 'space-between',
-          alignItems: 'center', marginBottom: '12px',
+          alignItems: 'center', marginBottom: '16px',
         }}>
-          <h2 style={{ fontWeight: '800', fontSize: '16px', color: '#0F172A' }}>
-            Quick access
-          </h2>
+          <div>
+            <h2 style={{ fontSize: '18px', fontWeight: '800', color: '#0F172A' }}>
+              Featured Hostels Near Campus
+            </h2>
+            <p style={{ fontSize: '13px', color: '#64748B', marginTop: '2px' }}>
+              Hand-picked student accommodations near major campus hubs.
+            </p>
+          </div>
+          <Link href="/housing" style={{
+            display: 'flex', alignItems: 'center', gap: '4px',
+            fontSize: '13px', fontWeight: '600', color: '#1E3A8A',
+          }}>
+            View all <ArrowRight size={14} />
+          </Link>
         </div>
+
         <div style={{
-          display: 'grid',
-          gridTemplateColumns: '1fr 1fr',
-          gap: '10px',
+          display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)',
+          gap: '16px',
         }}>
-          {quickLinks.map((link) => (
-            <Link
-              key={link.label}
-              href={link.href}
-              style={{ textDecoration: 'none' }}
+          {featuredHostels.map((hostel) => (
+            <div key={hostel.name} style={{
+              background: 'white', borderRadius: '16px',
+              overflow: 'hidden', border: '1px solid #F1F5F9',
+              boxShadow: '0 1px 4px rgba(0,0,0,0.05)',
+              cursor: 'pointer', transition: 'all 0.2s',
+            }}
+              onMouseEnter={(e) => {
+                (e.currentTarget as HTMLDivElement).style.boxShadow = '0 4px 16px rgba(0,0,0,0.1)';
+                (e.currentTarget as HTMLDivElement).style.transform = 'translateY(-2px)';
+              }}
+              onMouseLeave={(e) => {
+                (e.currentTarget as HTMLDivElement).style.boxShadow = '0 1px 4px rgba(0,0,0,0.05)';
+                (e.currentTarget as HTMLDivElement).style.transform = 'translateY(0)';
+              }}
             >
-              <div style={{
-                background: 'white',
-                borderRadius: '16px',
-                padding: '16px',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '12px',
-                boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
-              }}>
+              {/* Image */}
+              <div style={{ position: 'relative', height: '160px', overflow: 'hidden' }}>
+                <img
+                  src={hostel.image}
+                  alt={hostel.name}
+                  style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                />
+                {hostel.verified && (
+                  <div style={{
+                    position: 'absolute', top: '10px', left: '10px',
+                    background: '#10B981', color: 'white',
+                    fontSize: '10px', fontWeight: '700',
+                    padding: '3px 8px', borderRadius: '20px',
+                    display: 'flex', alignItems: 'center', gap: '4px',
+                  }}>
+                    <Shield size={10} />
+                    Verified
+                  </div>
+                )}
                 <div style={{
-                  width: '40px', height: '40px',
-                  background: link.color,
-                  borderRadius: '12px',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  flexShrink: 0,
+                  position: 'absolute', bottom: '10px', right: '10px',
+                  background: 'rgba(0,0,0,0.7)', color: 'white',
+                  fontSize: '12px', fontWeight: '700',
+                  padding: '4px 10px', borderRadius: '8px',
                 }}>
-                  <link.icon size={18} color={link.iconColor} />
+                  {hostel.price}/mo
                 </div>
-                <span style={{
-                  fontSize: '13px', fontWeight: '700', color: '#0F172A',
-                }}>
-                  {link.label}
-                </span>
               </div>
-            </Link>
+
+              {/* Content */}
+              <div style={{ padding: '14px' }}>
+                <h3 style={{
+                  fontWeight: '700', fontSize: '14px',
+                  color: '#0F172A', marginBottom: '6px',
+                }}>
+                  {hostel.name}
+                </h3>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '4px', marginBottom: '8px' }}>
+                  <MapPin size={12} color="#94A3B8" />
+                  <span style={{ fontSize: '12px', color: '#64748B' }}>{hostel.location}</span>
+                </div>
+                <div style={{
+                  display: 'flex', justifyContent: 'space-between',
+                  alignItems: 'center',
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                    <Star size={12} color="#F59E0B" fill="#F59E0B" />
+                    <span style={{ fontSize: '12px', fontWeight: '600', color: '#0F172A' }}>
+                      {hostel.rating}
+                    </span>
+                  </div>
+                  <button style={{
+                    background: 'none', border: 'none',
+                    color: '#1E3A8A', fontSize: '12px',
+                    fontWeight: '600', cursor: 'pointer',
+                  }}>
+                    Details →
+                  </button>
+                </div>
+              </div>
+            </div>
           ))}
         </div>
       </div>
 
-      {/* Wallet balance card */}
-      <div style={{ padding: '16px 16px 0' }}>
+      {/* Bottom row: Tutors + Trending */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
+
+        {/* Popular Tutors */}
         <div style={{
-          background: 'linear-gradient(135deg, #3730A3 0%, #4F46E5 100%)',
-          borderRadius: '20px',
-          padding: '20px',
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
+          background: 'white', borderRadius: '16px',
+          padding: '20px', border: '1px solid #F1F5F9',
+          boxShadow: '0 1px 4px rgba(0,0,0,0.05)',
         }}>
-          <div>
-            <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: '12px', marginBottom: '4px' }}>
-              Wallet Balance
-            </p>
-            <p style={{ color: 'white', fontWeight: '800', fontSize: '28px', letterSpacing: '-1px' }}>
-              ₦{stats.wallet.toLocaleString()}
-            </p>
+          <div style={{
+            display: 'flex', justifyContent: 'space-between',
+            alignItems: 'center', marginBottom: '16px',
+          }}>
+            <h2 style={{ fontSize: '16px', fontWeight: '800', color: '#0F172A' }}>
+              Popular Tutors & Designers
+            </h2>
+            <Link href="/services" style={{
+              fontSize: '12px', fontWeight: '600', color: '#1E3A8A',
+            }}>
+              See all experts →
+            </Link>
           </div>
-          <Link href="/wallet" style={{
-            display: 'flex', alignItems: 'center', gap: '6px',
-            background: 'rgba(255,255,255,0.15)',
-            border: '1px solid rgba(255,255,255,0.2)',
-            borderRadius: '12px',
-            padding: '10px 14px',
-            textDecoration: 'none',
-          }}>
-            <span style={{ color: 'white', fontSize: '13px', fontWeight: '600' }}>
-              View
-            </span>
-            <ArrowRight size={14} color="white" />
-          </Link>
-        </div>
-      </div>
 
-      {/* Popular Services preview */}
-      <div style={{ padding: '20px 16px 0' }}>
-        <div style={{
-          display: 'flex', justifyContent: 'space-between',
-          alignItems: 'center', marginBottom: '12px',
-        }}>
-          <h2 style={{ fontWeight: '800', fontSize: '16px', color: '#0F172A' }}>
-            Popular services
-          </h2>
-          <Link href="/marketplace" style={{
-            fontSize: '13px', color: '#4F46E5',
-            fontWeight: '600', textDecoration: 'none',
-          }}>
-            See all
-          </Link>
-        </div>
-
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-          {[
-            { name: 'Logo Design', category: 'Design', price: '₦3,000', rating: '4.9', color: '#EEF2FF', iconColor: '#4F46E5' },
-            { name: 'Math Tutoring', category: 'Tutoring', price: '₦2,000/hr', rating: '4.8', color: '#F0FDF4', iconColor: '#16A34A' },
-            { name: 'Web Development', category: 'Tech', price: '₦15,000', rating: '5.0', color: '#FFF7ED', iconColor: '#EA580C' },
-          ].map((service) => (
-            <Link
-              key={service.name}
-              href="/marketplace"
-              style={{ textDecoration: 'none' }}
-            >
-              <div style={{
-                background: 'white',
-                borderRadius: '16px',
-                padding: '14px 16px',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '14px',
-                boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            {popularTutors.map((tutor) => (
+              <div key={tutor.name} style={{
+                display: 'flex', alignItems: 'center',
+                gap: '12px', padding: '12px',
+                background: '#F8FAFC', borderRadius: '12px',
               }}>
                 <div style={{
-                  width: '48px', height: '48px',
-                  background: service.color,
-                  borderRadius: '14px',
+                  width: '44px', height: '44px',
+                  background: 'linear-gradient(135deg, #1E3A8A, #6D28D9)',
+                  borderRadius: '50%',
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                   flexShrink: 0,
                 }}>
-                  <ShoppingBag size={20} color={service.iconColor} />
+                  <span style={{ color: 'white', fontWeight: '700', fontSize: '14px' }}>
+                    {tutor.avatar}
+                  </span>
                 </div>
                 <div style={{ flex: 1 }}>
-                  <p style={{ fontWeight: '700', fontSize: '14px', color: '#0F172A', marginBottom: '4px' }}>
-                    {service.name}
+                  <p style={{ fontWeight: '700', fontSize: '13px', color: '#0F172A' }}>
+                    {tutor.name}
                   </p>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <span style={{
-                      fontSize: '11px', fontWeight: '600',
-                      color: service.iconColor,
-                      background: service.color,
-                      padding: '2px 8px', borderRadius: '20px',
-                    }}>
-                      {service.category}
-                    </span>
-                    <span style={{ fontSize: '11px', color: '#94A3B8' }}>
-                      ⭐ {service.rating}
+                  <p style={{ fontSize: '11px', color: '#64748B' }}>{tutor.role}</p>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '4px', marginTop: '2px' }}>
+                    <Star size={10} color="#F59E0B" fill="#F59E0B" />
+                    <span style={{ fontSize: '11px', color: '#64748B' }}>
+                      {tutor.rating} ({tutor.reviews} reviews)
                     </span>
                   </div>
                 </div>
-                <p style={{ fontWeight: '700', fontSize: '14px', color: '#4F46E5' }}>
-                  {service.price}
+                <button style={{
+                  background: '#EFF6FF', color: '#1E3A8A',
+                  border: 'none', borderRadius: '8px',
+                  padding: '6px 12px', fontSize: '12px',
+                  fontWeight: '600', cursor: 'pointer',
+                  flexShrink: 0,
+                }}>
+                  Book Session
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Trending Gadgets */}
+        <div style={{
+          background: 'white', borderRadius: '16px',
+          padding: '20px', border: '1px solid #F1F5F9',
+          boxShadow: '0 1px 4px rgba(0,0,0,0.05)',
+        }}>
+          <div style={{
+            display: 'flex', justifyContent: 'space-between',
+            alignItems: 'center', marginBottom: '16px',
+          }}>
+            <h2 style={{ fontSize: '16px', fontWeight: '800', color: '#0F172A' }}>
+              Trending Gadgets
+            </h2>
+            <span style={{
+              background: '#EFF6FF', color: '#1E3A8A',
+              fontSize: '11px', fontWeight: '600',
+              padding: '3px 10px', borderRadius: '20px',
+            }}>
+              Campus Deals
+            </span>
+          </div>
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            {listings.slice(0, 3).length > 0 ? listings.slice(0, 3).map((listing: any) => (
+              <div key={listing.id} style={{
+                display: 'flex', alignItems: 'center',
+                gap: '12px', padding: '12px',
+                background: '#F8FAFC', borderRadius: '12px',
+              }}>
+                <div style={{
+                  width: '48px', height: '48px',
+                  background: '#EFF6FF', borderRadius: '12px',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  flexShrink: 0, fontSize: '22px',
+                }}>
+                  🛍️
+                </div>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <p style={{
+                    fontWeight: '600', fontSize: '13px',
+                    color: '#0F172A', overflow: 'hidden',
+                    textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+                  }}>
+                    {listing.title}
+                  </p>
+                  <p style={{ fontSize: '11px', color: '#94A3B8' }}>
+                    Seller: {listing.seller?.name}
+                  </p>
+                </div>
+                <p style={{
+                  fontWeight: '800', fontSize: '14px',
+                  color: '#1E3A8A', flexShrink: 0,
+                }}>
+                  ₦{listing.price?.toLocaleString()}
                 </p>
               </div>
-            </Link>
-          ))}
+            )) : (
+              [
+                { name: 'SonicPro Max Headphones', condition: 'Like New', price: '₦120,000' },
+                { name: 'TabPro 12" with Keyboard', condition: 'Graduating Senior', price: '₦340,000' },
+                { name: 'MacBook Pro M2 Student', condition: 'Like New', price: '₦850,000' },
+              ].map((item) => (
+                <div key={item.name} style={{
+                  display: 'flex', alignItems: 'center',
+                  gap: '12px', padding: '12px',
+                  background: '#F8FAFC', borderRadius: '12px',
+                }}>
+                  <div style={{
+                    width: '48px', height: '48px',
+                    background: '#EFF6FF', borderRadius: '12px',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    flexShrink: 0, fontSize: '22px',
+                  }}>
+                    💻
+                  </div>
+                  <div style={{ flex: 1 }}>
+                    <p style={{ fontWeight: '600', fontSize: '13px', color: '#0F172A' }}>
+                      {item.name}
+                    </p>
+                    <p style={{ fontSize: '11px', color: '#94A3B8' }}>{item.condition}</p>
+                  </div>
+                  <p style={{ fontWeight: '800', fontSize: '14px', color: '#1E3A8A', flexShrink: 0 }}>
+                    {item.price}
+                  </p>
+                </div>
+              ))
+            )}
+          </div>
+
+          <Link href="/marketplace" style={{
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            gap: '6px', marginTop: '16px',
+            background: '#1E3A8A', color: 'white',
+            borderRadius: '10px', padding: '10px',
+            fontSize: '13px', fontWeight: '600',
+          }}>
+            Go to Marketplace <ArrowRight size={14} />
+          </Link>
         </div>
       </div>
 
-      {/* Bottom spacing */}
-      <div style={{ height: '20px' }} />
+      {/* Stats bar */}
+      <div style={{
+        display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)',
+        gap: '16px', marginTop: '24px',
+        background: '#1E3A8A', borderRadius: '16px',
+        padding: '20px 24px',
+      }}>
+        {[
+          { value: '10k+', label: 'ACTIVE STUDENTS' },
+          { value: '500+', label: 'VERIFIED HOSTELS' },
+          { value: '1.2k+', label: 'SERVICE PROVIDERS' },
+          { value: '50k+', label: 'ITEMS SOLD' },
+        ].map((stat) => (
+          <div key={stat.label} style={{ textAlign: 'center' }}>
+            <p style={{ fontSize: '24px', fontWeight: '800', color: 'white' }}>
+              {stat.value}
+            </p>
+            <p style={{ fontSize: '11px', color: 'rgba(255,255,255,0.5)', marginTop: '4px', letterSpacing: '0.5px' }}>
+              {stat.label}
+            </p>
+          </div>
+        ))}
+      </div>
+
     </div>
   );
 }
