@@ -4,6 +4,7 @@ import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/store/authStore';
 import Navbar from '@/components/layout/Navbar';
+import Sidebar from '@/components/layout/Sidebar';
 
 export default function MainLayout({
   children,
@@ -27,15 +28,19 @@ export default function MainLayout({
   }, [user]);
 
   return (
-    <div style={{ minHeight: '100vh', background: '#F8FAFC', fontFamily: 'Inter, sans-serif' }}>
+    <div style={{ minHeight: '100vh', background: '#F8FAFC' }}>
       <Navbar />
-      <main style={{
-        paddingTop: '64px',
-        paddingBottom: '80px',
-        width: '100%',
-      }}>
-        {children}
-      </main>
+      <div style={{ display: 'flex', paddingTop: '64px' }}>
+        <Sidebar />
+        <main style={{
+          marginLeft: '200px',
+          flex: 1,
+          minHeight: 'calc(100vh - 64px)',
+          padding: '24px',
+        }}>
+          {children}
+        </main>
+      </div>
     </div>
   );
 }

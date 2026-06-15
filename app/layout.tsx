@@ -1,15 +1,9 @@
 import type { Metadata } from 'next';
-import { Inter, Plus_Jakarta_Sans } from 'next/font/google';
 import './globals.css';
 
-const jakarta = Plus_Jakarta_Sans({
-  subsets: ['latin'],
-  variable: '--font-jakarta',
-});
-
 export const metadata: Metadata = {
-  title: 'UniVerse — Student Ecosystem',
-  description: 'Buy and sell services with fellow students. Secured by escrow.',
+  title: 'UniVerse — The Campus Ecosystem',
+  description: 'Verified housing, trusted services, and a student marketplace.',
 };
 
 export default function RootLayout({
@@ -19,7 +13,13 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={`${jakarta.variable} font-sans`}>{children}</body>
+      <head>
+        <link
+          href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"
+          rel="stylesheet"
+        />
+      </head>
+      <body>{children}</body>
     </html>
   );
 }
