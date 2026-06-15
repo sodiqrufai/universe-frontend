@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import api from '@/lib/api';
 import { useAuthStore } from '@/store/authStore';
 import Link from 'next/link';
-import { Mail, Lock, User, Phone, Zap, Eye, EyeOff, ShoppingBag, Star, Shield } from 'lucide-react';
+import { Mail, Lock, User, Phone, Eye, EyeOff, Building2, Wrench, ShoppingBag, CheckCircle } from 'lucide-react';
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -14,16 +14,10 @@ export default function RegisterPage() {
   const [error, setError] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [form, setForm] = useState({
-    name: '',
-    email: '',
-    password: '',
-    phone: '',
-    role: 'BUYER',
+    name: '', email: '', password: '', phone: '', role: 'BUYER',
   });
 
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
-  ) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
@@ -43,202 +37,165 @@ export default function RegisterPage() {
   };
 
   const roles = [
-    {
-      value: 'BUYER',
-      label: 'Buyer',
-      desc: 'I want to purchase services',
-      icon: ShoppingBag,
-    },
-    {
-      value: 'SELLER',
-      label: 'Seller',
-      desc: 'I want to offer services',
-      icon: Star,
-    },
-    {
-      value: 'UNIVERSAL',
-      label: 'Both',
-      desc: 'I want to buy and sell',
-      icon: Shield,
-    },
+    { value: 'BUYER', icon: '🎓', label: 'Student', desc: 'Browse and purchase services' },
+    { value: 'SELLER', icon: '🏪', label: 'Provider', desc: 'Offer services or products' },
+    { value: 'UNIVERSAL', icon: '⚡', label: 'Both', desc: 'Buy and sell on UniVerse' },
   ];
 
   return (
-    <div style={{ display: 'flex', minHeight: '100vh', fontFamily: 'Inter, sans-serif' }}>
-
-      {/* ===== LEFT PANEL ===== */}
-      <div
+    <div style={{
+      minHeight: '100vh', background: '#F8FAFC',
+      display: 'flex', fontFamily: 'Inter, sans-serif',
+    }}>
+      {/* Left panel */}
+      <div style={{
+        width: '460px', flexShrink: 0,
+        background: 'linear-gradient(160deg, #1E3A8A 0%, #6D28D9 100%)',
+        padding: '48px 40px',
+        display: 'flex', flexDirection: 'column',
+        position: 'relative', overflow: 'hidden',
+      }}
         className="hidden lg:flex"
-        style={{
-          width: '45%',
-          background: 'linear-gradient(160deg, #0A0F2C 0%, #1a1060 100%)',
-          flexDirection: 'column',
-          justifyContent: 'space-between',
-          padding: '48px',
-          position: 'relative',
-          overflow: 'hidden',
-        }}
       >
-        {/* Glow blobs */}
         <div style={{
-          position: 'absolute', top: '-80px', left: '-80px',
-          width: '350px', height: '350px',
-          background: 'rgba(99,102,241,0.15)',
-          borderRadius: '50%', filter: 'blur(80px)',
-        }} />
-        <div style={{
-          position: 'absolute', bottom: '-80px', right: '-80px',
-          width: '350px', height: '350px',
-          background: 'rgba(139,92,246,0.1)',
-          borderRadius: '50%', filter: 'blur(80px)',
+          position: 'absolute', top: '-80px', right: '-80px',
+          width: '300px', height: '300px',
+          background: 'rgba(255,255,255,0.05)', borderRadius: '50%',
         }} />
 
         {/* Logo */}
-        <div style={{ position: 'relative', display: 'flex', alignItems: 'center', gap: '10px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '48px', position: 'relative' }}>
           <div style={{
-            width: '40px', height: '40px',
-            background: '#4F46E5', borderRadius: '12px',
+            width: '36px', height: '36px',
+            background: 'rgba(255,255,255,0.2)',
+            borderRadius: '10px',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
           }}>
-            <Zap size={18} color="white" />
+            <span style={{ color: 'white', fontWeight: '800', fontSize: '18px' }}>U</span>
           </div>
-          <span style={{ fontSize: '20px', fontWeight: '700', color: 'white', letterSpacing: '-0.5px' }}>
-            Uni<span style={{ color: '#818CF8' }}>Verse</span>
-          </span>
+          <span style={{ fontWeight: '800', fontSize: '20px', color: 'white' }}>UniVerse</span>
         </div>
 
-        {/* Center content */}
-        <div style={{ position: 'relative' }}>
+        <div style={{ position: 'relative', flex: 1 }}>
           <h2 style={{
-            fontSize: '38px', fontWeight: '800',
+            fontSize: '36px', fontWeight: '800',
             color: 'white', lineHeight: '1.2',
-            marginBottom: '16px', letterSpacing: '-1px',
+            letterSpacing: '-0.5px', marginBottom: '16px',
           }}>
-            Join thousands of
-            <br />
-            <span style={{ color: '#818CF8' }}>student hustlers.</span>
+            Let's build your future in UniVerse
           </h2>
-          <p style={{
-            color: 'rgba(255,255,255,0.45)',
-            fontSize: '14px', lineHeight: '1.7',
-            marginBottom: '40px',
-          }}>
-            UniVerse connects students across Nigerian universities to buy, sell, and grow — all protected by escrow.
+          <p style={{ fontSize: '15px', color: 'rgba(255,255,255,0.6)', lineHeight: '1.6', marginBottom: '40px' }}>
+            Select the primary category for your account. This helps us customize your dashboard and experience.
           </p>
 
-          {/* Stats cards */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '32px' }}>
-            {[
-              { value: '5,000+', label: 'Active Students' },
-              { value: '500+', label: 'Listings' },
-              { value: '₦2M+', label: 'Transacted' },
-              { value: '100%', label: 'Escrow Safe' },
-            ].map((stat) => (
-              <div key={stat.label} style={{
-                background: 'rgba(255,255,255,0.05)',
-                border: '1px solid rgba(255,255,255,0.08)',
-                borderRadius: '14px', padding: '16px',
+          {/* Feature highlights */}
+          {[
+            { icon: Building2, title: 'Find Verified Housing', desc: 'GIS-verified hostels and apartments near campus' },
+            { icon: Wrench, title: 'Hire Trusted Providers', desc: 'Vetted service providers for all campus needs' },
+            { icon: ShoppingBag, title: 'Campus Marketplace', desc: 'Buy and sell within your university community' },
+          ].map((feature) => (
+            <div key={feature.title} style={{
+              display: 'flex', alignItems: 'flex-start', gap: '14px',
+              marginBottom: '20px',
+            }}>
+              <div style={{
+                width: '36px', height: '36px',
+                background: 'rgba(255,255,255,0.15)',
+                borderRadius: '10px',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                flexShrink: 0,
               }}>
-                <p style={{ fontSize: '22px', fontWeight: '800', color: 'white', marginBottom: '4px' }}>
-                  {stat.value}
+                <feature.icon size={18} color="white" />
+              </div>
+              <div>
+                <p style={{ fontWeight: '700', fontSize: '14px', color: 'white', marginBottom: '2px' }}>
+                  {feature.title}
                 </p>
-                <p style={{ fontSize: '12px', color: 'rgba(255,255,255,0.35)' }}>
-                  {stat.label}
+                <p style={{ fontSize: '12px', color: 'rgba(255,255,255,0.5)' }}>
+                  {feature.desc}
                 </p>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Trust note */}
+        <div style={{
+          background: 'rgba(255,255,255,0.1)',
+          border: '1px solid rgba(255,255,255,0.15)',
+          borderRadius: '12px', padding: '16px',
+          position: 'relative',
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
+            <CheckCircle size={16} color="#10B981" />
+            <p style={{ fontWeight: '700', fontSize: '13px', color: 'white' }}>Trust is our Priority</p>
+          </div>
+          <p style={{ fontSize: '12px', color: 'rgba(255,255,255,0.5)', lineHeight: '1.5' }}>
+            All sellers undergo a 48-hour identity verification process to ensure safety and integrity.
+          </p>
+        </div>
+      </div>
+
+      {/* Right panel */}
+      <div style={{
+        flex: 1, display: 'flex',
+        alignItems: 'center', justifyContent: 'center',
+        padding: '48px 40px', overflowY: 'auto',
+      }}>
+        <div style={{ width: '100%', maxWidth: '480px' }}>
+
+          {/* Progress steps */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0', marginBottom: '32px' }}>
+            {[
+              { num: 1, label: 'Choose Path' },
+              { num: 2, label: 'Profile Info' },
+              { num: 3, label: 'Verification' },
+              { num: 4, label: 'Review' },
+            ].map((step, i) => (
+              <div key={step.num} style={{ display: 'flex', alignItems: 'center', flex: i < 3 ? 1 : 0 }}>
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                  <div style={{
+                    width: '32px', height: '32px',
+                    background: step.num === 1 ? '#1E3A8A' : '#E2E8F0',
+                    borderRadius: '50%',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    fontSize: '13px', fontWeight: '700',
+                    color: step.num === 1 ? 'white' : '#94A3B8',
+                  }}>
+                    {step.num}
+                  </div>
+                  <p style={{
+                    fontSize: '10px', fontWeight: '600',
+                    color: step.num === 1 ? '#1E3A8A' : '#94A3B8',
+                    marginTop: '4px', whiteSpace: 'nowrap',
+                  }}>
+                    {step.label}
+                  </p>
+                </div>
+                {i < 3 && (
+                  <div style={{
+                    flex: 1, height: '2px',
+                    background: step.num === 1 ? '#1E3A8A' : '#E2E8F0',
+                    margin: '0 8px', marginTop: '-14px',
+                  }} />
+                )}
               </div>
             ))}
           </div>
 
-          {/* Testimonial */}
-          <div style={{
-            background: 'rgba(255,255,255,0.05)',
-            border: '1px solid rgba(255,255,255,0.1)',
-            borderRadius: '16px', padding: '20px',
-            backdropFilter: 'blur(10px)',
-          }}>
-            <p style={{
-              color: 'rgba(255,255,255,0.6)',
-              fontSize: '13px', lineHeight: '1.6',
-              marginBottom: '12px', fontStyle: 'italic',
-            }}>
-              "I made ₦45,000 in my first month selling graphics on UniVerse. Best decision ever!"
-            </p>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-              <div style={{
-                width: '32px', height: '32px',
-                background: 'rgba(79,70,229,0.3)',
-                borderRadius: '50%',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                flexShrink: 0,
-              }}>
-                <span style={{ color: '#A5B4FC', fontWeight: '700', fontSize: '11px' }}>AO</span>
-              </div>
-              <div>
-                <p style={{ color: 'white', fontSize: '12px', fontWeight: '600' }}>Adaeze O.</p>
-                <p style={{ color: 'rgba(255,255,255,0.3)', fontSize: '11px' }}>Graphics Designer · UNILAG</p>
-              </div>
-            </div>
-          </div>
-        </div>
+          <h1 style={{ fontSize: '24px', fontWeight: '800', color: '#0F172A', marginBottom: '6px', textAlign: 'center' }}>
+            Create your account
+          </h1>
+          <p style={{ fontSize: '14px', color: '#64748B', marginBottom: '24px', textAlign: 'center' }}>
+            Already have an account?{' '}
+            <Link href="/login" style={{ color: '#1E3A8A', fontWeight: '700' }}>Sign in</Link>
+          </p>
 
-        {/* Footer */}
-        <p style={{ position: 'relative', color: 'rgba(255,255,255,0.2)', fontSize: '12px' }}>
-          © 2026 UniVerse. Built for students.
-        </p>
-      </div>
-
-      {/* ===== RIGHT PANEL ===== */}
-      <div style={{
-        flex: 1,
-        background: 'white',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: '48px 32px',
-        overflowY: 'auto',
-      }}>
-        <div style={{ width: '100%', maxWidth: '420px' }}>
-
-          {/* Mobile logo */}
-          <div className="flex lg:hidden" style={{
-            alignItems: 'center', gap: '10px', marginBottom: '32px',
-          }}>
-            <div style={{
-              width: '36px', height: '36px', background: '#4F46E5',
-              borderRadius: '10px', display: 'flex',
-              alignItems: 'center', justifyContent: 'center',
-            }}>
-              <Zap size={16} color="white" />
-            </div>
-            <span style={{ fontSize: '18px', fontWeight: '700', color: '#0F172A' }}>
-              Uni<span style={{ color: '#4F46E5' }}>Verse</span>
-            </span>
-          </div>
-
-          {/* Heading */}
-          <div style={{ marginBottom: '28px' }}>
-            <h1 style={{
-              fontSize: '26px', fontWeight: '800',
-              color: '#0F172A', marginBottom: '8px',
-              letterSpacing: '-0.5px',
-            }}>
-              Create your account
-            </h1>
-            <p style={{ fontSize: '14px', color: '#64748B' }}>
-              Already have an account?{' '}
-              <Link href="/login" style={{ color: '#4F46E5', fontWeight: '600', textDecoration: 'none' }}>
-                Sign in
-              </Link>
-            </p>
-          </div>
-
-          {/* Error */}
           {error && (
             <div style={{
               background: '#FEF2F2', border: '1px solid #FEE2E2',
-              color: '#DC2626', padding: '12px 16px',
-              borderRadius: '12px', marginBottom: '20px',
-              fontSize: '13px',
+              color: '#DC2626', padding: '12px 14px',
+              borderRadius: '10px', marginBottom: '20px', fontSize: '13px',
             }}>
               {error}
             </div>
@@ -246,251 +203,147 @@ export default function RegisterPage() {
 
           <form onSubmit={handleSubmit}>
 
-            {/* Full Name */}
-            <div style={{ marginBottom: '16px' }}>
-              <label style={{
-                display: 'block', fontSize: '13px',
-                fontWeight: '600', color: '#374151', marginBottom: '8px',
-              }}>
-                Full Name
-              </label>
-              <div style={{ position: 'relative' }}>
-                <User size={15} color="#9CA3AF" style={{
-                  position: 'absolute', left: '14px',
-                  top: '50%', transform: 'translateY(-50%)',
-                }} />
-                <input
-                  type="text"
-                  name="name"
-                  value={form.name}
-                  onChange={handleChange}
-                  required
-                  placeholder="John Doe"
-                  style={{
-                    width: '100%', border: '1.5px solid #E5E7EB',
-                    borderRadius: '12px', padding: '12px 14px 12px 40px',
-                    fontSize: '14px', color: '#111827',
-                    background: '#F9FAFB', boxSizing: 'border-box',
-                  }}
-                  onFocus={(e) => e.target.style.borderColor = '#4F46E5'}
-                  onBlur={(e) => e.target.style.borderColor = '#E5E7EB'}
-                />
-              </div>
-            </div>
-
-            {/* Email */}
-            <div style={{ marginBottom: '16px' }}>
-              <label style={{
-                display: 'block', fontSize: '13px',
-                fontWeight: '600', color: '#374151', marginBottom: '8px',
-              }}>
-                Email Address
-              </label>
-              <div style={{ position: 'relative' }}>
-                <Mail size={15} color="#9CA3AF" style={{
-                  position: 'absolute', left: '14px',
-                  top: '50%', transform: 'translateY(-50%)',
-                }} />
-                <input
-                  type="email"
-                  name="email"
-                  value={form.email}
-                  onChange={handleChange}
-                  required
-                  placeholder="john@university.edu"
-                  style={{
-                    width: '100%', border: '1.5px solid #E5E7EB',
-                    borderRadius: '12px', padding: '12px 14px 12px 40px',
-                    fontSize: '14px', color: '#111827',
-                    background: '#F9FAFB', boxSizing: 'border-box',
-                  }}
-                  onFocus={(e) => e.target.style.borderColor = '#4F46E5'}
-                  onBlur={(e) => e.target.style.borderColor = '#E5E7EB'}
-                />
-              </div>
-            </div>
-
-            {/* Phone */}
-            <div style={{ marginBottom: '16px' }}>
-              <label style={{
-                display: 'block', fontSize: '13px',
-                fontWeight: '600', color: '#374151', marginBottom: '8px',
-              }}>
-                Phone <span style={{ color: '#94A3B8', fontWeight: '400' }}>(optional)</span>
-              </label>
-              <div style={{ position: 'relative' }}>
-                <Phone size={15} color="#9CA3AF" style={{
-                  position: 'absolute', left: '14px',
-                  top: '50%', transform: 'translateY(-50%)',
-                }} />
-                <input
-                  type="tel"
-                  name="phone"
-                  value={form.phone}
-                  onChange={handleChange}
-                  placeholder="+234 800 000 0000"
-                  style={{
-                    width: '100%', border: '1.5px solid #E5E7EB',
-                    borderRadius: '12px', padding: '12px 14px 12px 40px',
-                    fontSize: '14px', color: '#111827',
-                    background: '#F9FAFB', boxSizing: 'border-box',
-                  }}
-                  onFocus={(e) => e.target.style.borderColor = '#4F46E5'}
-                  onBlur={(e) => e.target.style.borderColor = '#E5E7EB'}
-                />
-              </div>
-            </div>
-
-            {/* Password */}
-            <div style={{ marginBottom: '20px' }}>
-              <label style={{
-                display: 'block', fontSize: '13px',
-                fontWeight: '600', color: '#374151', marginBottom: '8px',
-              }}>
-                Password
-              </label>
-              <div style={{ position: 'relative' }}>
-                <Lock size={15} color="#9CA3AF" style={{
-                  position: 'absolute', left: '14px',
-                  top: '50%', transform: 'translateY(-50%)',
-                }} />
-                <input
-                  type={showPassword ? 'text' : 'password'}
-                  name="password"
-                  value={form.password}
-                  onChange={handleChange}
-                  required
-                  placeholder="Create a strong password"
-                  style={{
-                    width: '100%', border: '1.5px solid #E5E7EB',
-                    borderRadius: '12px', padding: '12px 40px 12px 40px',
-                    fontSize: '14px', color: '#111827',
-                    background: '#F9FAFB', boxSizing: 'border-box',
-                  }}
-                  onFocus={(e) => e.target.style.borderColor = '#4F46E5'}
-                  onBlur={(e) => e.target.style.borderColor = '#E5E7EB'}
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  style={{
-                    position: 'absolute', right: '14px',
-                    top: '50%', transform: 'translateY(-50%)',
-                    background: 'none', border: 'none',
-                    cursor: 'pointer', color: '#9CA3AF',
-                    display: 'flex', alignItems: 'center',
-                  }}
-                >
-                  {showPassword ? <EyeOff size={15} /> : <Eye size={15} />}
-                </button>
-              </div>
-            </div>
-
             {/* Role selector */}
-            <div style={{ marginBottom: '24px' }}>
-              <label style={{
-                display: 'block', fontSize: '13px',
-                fontWeight: '600', color: '#374151', marginBottom: '10px',
-              }}>
-                I want to
+            <div style={{ marginBottom: '20px' }}>
+              <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', color: '#374151', marginBottom: '10px' }}>
+                I want to join as
               </label>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px' }}>
-                {roles.map((r) => (
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10px' }}>
+                {roles.map((role) => (
                   <button
-                    key={r.value}
+                    key={role.value}
                     type="button"
-                    onClick={() => setForm({ ...form, role: r.value })}
+                    onClick={() => setForm({ ...form, role: role.value })}
                     style={{
-                      border: form.role === r.value ? '2px solid #4F46E5' : '1.5px solid #E5E7EB',
-                      borderRadius: '12px',
-                      padding: '12px 8px',
-                      background: form.role === r.value ? '#EEF2FF' : '#F9FAFB',
-                      cursor: 'pointer',
-                      display: 'flex',
-                      flexDirection: 'column',
-                      alignItems: 'center',
-                      gap: '6px',
+                      border: form.role === role.value ? '2px solid #1E3A8A' : '1.5px solid #E5E7EB',
+                      borderRadius: '12px', padding: '14px 8px',
+                      background: form.role === role.value ? '#EFF6FF' : '#F9FAFB',
+                      cursor: 'pointer', textAlign: 'center',
                       transition: 'all 0.2s',
                     }}
                   >
-                    <r.icon
-                      size={18}
-                      color={form.role === r.value ? '#4F46E5' : '#94A3B8'}
-                    />
-                    <span style={{
-                      fontSize: '12px',
-                      fontWeight: '700',
-                      color: form.role === r.value ? '#4F46E5' : '#374151',
-                    }}>
-                      {r.label}
-                    </span>
-                    <span style={{
-                      fontSize: '10px',
-                      color: form.role === r.value ? '#6366F1' : '#94A3B8',
-                      textAlign: 'center',
-                      lineHeight: '1.3',
-                    }}>
-                      {r.desc}
-                    </span>
+                    <div style={{ fontSize: '24px', marginBottom: '6px' }}>{role.icon}</div>
+                    <p style={{ fontWeight: '700', fontSize: '12px', color: form.role === role.value ? '#1E3A8A' : '#374151', marginBottom: '2px' }}>
+                      {role.label}
+                    </p>
+                    <p style={{ fontSize: '10px', color: '#94A3B8', lineHeight: '1.3' }}>{role.desc}</p>
                   </button>
                 ))}
               </div>
             </div>
 
-            {/* Submit */}
-            <button
-              type="submit"
-              disabled={loading}
-              style={{
-                width: '100%',
-                background: loading ? '#818CF8' : '#4F46E5',
-                color: 'white', border: 'none',
-                borderRadius: '12px', padding: '14px',
-                fontSize: '14px', fontWeight: '700',
-                cursor: loading ? 'not-allowed' : 'pointer',
-                marginBottom: '16px',
-                letterSpacing: '0.3px',
-              }}
-            >
-              {loading ? 'Creating account...' : 'Create Account'}
-            </button>
-
-            {/* Divider */}
-            <div style={{
-              display: 'flex', alignItems: 'center',
-              gap: '12px', marginBottom: '16px',
-            }}>
-              <div style={{ flex: 1, height: '1px', background: '#F1F5F9' }} />
-              <span style={{ fontSize: '12px', color: '#94A3B8' }}>OR</span>
-              <div style={{ flex: 1, height: '1px', background: '#F1F5F9' }} />
+            {/* Fields */}
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '12px' }}>
+              <div>
+                <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', color: '#374151', marginBottom: '6px' }}>
+                  Full Name
+                </label>
+                <div style={{ position: 'relative' }}>
+                  <User size={14} color="#9CA3AF" style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)' }} />
+                  <input
+                    type="text" name="name" value={form.name}
+                    onChange={handleChange} required placeholder="John Doe"
+                    style={{
+                      width: '100%', border: '1.5px solid #E5E7EB',
+                      borderRadius: '10px', padding: '10px 12px 10px 36px',
+                      fontSize: '13px', background: '#F9FAFB',
+                      boxSizing: 'border-box',
+                    }}
+                    onFocus={(e) => e.target.style.borderColor = '#1E3A8A'}
+                    onBlur={(e) => e.target.style.borderColor = '#E5E7EB'}
+                  />
+                </div>
+              </div>
+              <div>
+                <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', color: '#374151', marginBottom: '6px' }}>
+                  Phone <span style={{ color: '#94A3B8', fontWeight: '400' }}>(optional)</span>
+                </label>
+                <div style={{ position: 'relative' }}>
+                  <Phone size={14} color="#9CA3AF" style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)' }} />
+                  <input
+                    type="tel" name="phone" value={form.phone}
+                    onChange={handleChange} placeholder="+234 800 000 0000"
+                    style={{
+                      width: '100%', border: '1.5px solid #E5E7EB',
+                      borderRadius: '10px', padding: '10px 12px 10px 36px',
+                      fontSize: '13px', background: '#F9FAFB',
+                      boxSizing: 'border-box',
+                    }}
+                    onFocus={(e) => e.target.style.borderColor = '#1E3A8A'}
+                    onBlur={(e) => e.target.style.borderColor = '#E5E7EB'}
+                  />
+                </div>
+              </div>
             </div>
 
-            {/* Login link */}
-            <Link
-              href="/login"
-              style={{
-                display: 'block', width: '100%',
-                border: '2px solid #4F46E5',
-                color: '#4F46E5', borderRadius: '12px',
-                padding: '13px', fontSize: '14px',
-                fontWeight: '700', textAlign: 'center',
-                textDecoration: 'none', boxSizing: 'border-box',
-              }}
-            >
-              Sign In Instead
-            </Link>
-          </form>
+            <div style={{ marginBottom: '12px' }}>
+              <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', color: '#374151', marginBottom: '6px' }}>
+                University Email
+              </label>
+              <div style={{ position: 'relative' }}>
+                <Mail size={14} color="#9CA3AF" style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)' }} />
+                <input
+                  type="email" name="email" value={form.email}
+                  onChange={handleChange} required placeholder="student@university.edu"
+                  style={{
+                    width: '100%', border: '1.5px solid #E5E7EB',
+                    borderRadius: '10px', padding: '10px 12px 10px 36px',
+                    fontSize: '13px', background: '#F9FAFB',
+                    boxSizing: 'border-box',
+                  }}
+                  onFocus={(e) => e.target.style.borderColor = '#1E3A8A'}
+                  onBlur={(e) => e.target.style.borderColor = '#E5E7EB'}
+                />
+              </div>
+            </div>
 
-          {/* Terms */}
-          <p style={{
-            fontSize: '12px', color: '#94A3B8',
-            marginTop: '24px', lineHeight: '1.6',
-          }}>
-            By creating an account, you agree to our{' '}
-            <span style={{ color: '#4F46E5', cursor: 'pointer' }}>Terms of Service</span>
-            {' '}and{' '}
-            <span style={{ color: '#4F46E5', cursor: 'pointer' }}>Privacy Policy</span>.
-          </p>
+            <div style={{ marginBottom: '20px' }}>
+              <label style={{ display: 'block', fontSize: '13px', fontWeight: '600', color: '#374151', marginBottom: '6px' }}>
+                Password
+              </label>
+              <div style={{ position: 'relative' }}>
+                <Lock size={14} color="#9CA3AF" style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)' }} />
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  name="password" value={form.password}
+                  onChange={handleChange} required placeholder="Create a strong password"
+                  style={{
+                    width: '100%', border: '1.5px solid #E5E7EB',
+                    borderRadius: '10px', padding: '10px 36px',
+                    fontSize: '13px', background: '#F9FAFB',
+                    boxSizing: 'border-box',
+                  }}
+                  onFocus={(e) => e.target.style.borderColor = '#1E3A8A'}
+                  onBlur={(e) => e.target.style.borderColor = '#E5E7EB'}
+                />
+                <button type="button" onClick={() => setShowPassword(!showPassword)} style={{
+                  position: 'absolute', right: '12px', top: '50%',
+                  transform: 'translateY(-50%)', background: 'none',
+                  border: 'none', cursor: 'pointer', color: '#9CA3AF',
+                  display: 'flex', alignItems: 'center',
+                }}>
+                  {showPassword ? <EyeOff size={14} /> : <Eye size={14} />}
+                </button>
+              </div>
+            </div>
+
+            <button type="submit" disabled={loading} style={{
+              width: '100%', background: '#1E3A8A',
+              color: 'white', border: 'none',
+              borderRadius: '12px', padding: '14px',
+              fontSize: '14px', fontWeight: '700',
+              cursor: loading ? 'not-allowed' : 'pointer',
+              opacity: loading ? 0.7 : 1, marginBottom: '16px',
+            }}>
+              {loading ? 'Creating account...' : 'Continue Setup →'}
+            </button>
+
+            <p style={{ textAlign: 'center', fontSize: '12px', color: '#94A3B8' }}>
+              By continuing you agree to our{' '}
+              <span style={{ color: '#1E3A8A', cursor: 'pointer' }}>Terms</span> &{' '}
+              <span style={{ color: '#1E3A8A', cursor: 'pointer' }}>Privacy</span>
+            </p>
+          </form>
         </div>
       </div>
     </div>
