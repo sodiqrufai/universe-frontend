@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import api from '@/lib/api';
-import { Bell, Check, Trash2, CheckCheck } from 'lucide-react';
+import { Bell, Check, Trash2, CheckCheck, Filter } from 'lucide-react';
 
 interface Notification {
   id: string;
@@ -12,18 +12,19 @@ interface Notification {
   created_at: string;
 }
 
-const typeConfig: Record<string, { color: string; bg: string; emoji: string }> = {
-  NEW_ORDER: { color: '#2563EB', bg: '#EFF6FF', emoji: '🛍️' },
-  DELIVERED: { color: '#7C3AED', bg: '#F5F3FF', emoji: '📦' },
-  COMPLETED: { color: '#16A34A', bg: '#F0FDF4', emoji: '✅' },
-  CANCELLED: { color: '#DC2626', bg: '#FEF2F2', emoji: '❌' },
-  DISPUTED: { color: '#EA580C', bg: '#FFF7ED', emoji: '⚠️' },
+const typeConfig: Record<string, { color: string; bg: string; emoji: string; label: string }> = {
+  NEW_ORDER: { color: '#2563EB', bg: '#EFF6FF', emoji: '🛍️', label: 'New Order' },
+  DELIVERED: { color: '#7C3AED', bg: '#F5F3FF', emoji: '📦', label: 'Delivered' },
+  COMPLETED: { color: '#10B981', bg: '#F0FDF4', emoji: '✅', label: 'Completed' },
+  CANCELLED: { color: '#DC2626', bg: '#FEF2F2', emoji: '❌', label: 'Cancelled' },
+  DISPUTED: { color: '#EA580C', bg: '#FFF7ED', emoji: '⚠️', label: 'Disputed' },
 };
 
 export default function NotificationsPage() {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [loading, setLoading] = useState(true);
   const [unreadCount, setUnreadCount] = useState(0);
+  const [filter, setFilter] = useState('all');
 
   useEffect(() => {
     fetchNotifications();
@@ -80,163 +81,183 @@ export default function NotificationsPage() {
     }
   };
 
+  const filtered = notifications.filter((n) => {
+    if (filter === 'unread') return !n.is_read;
+    if (filter === 'read') return n.is_read;
+    return true;
+  });
+
   return (
-    <div style={{ background: '#F8FAFC', minHeight: '100vh' }}>
+    <div style={{ maxWidth: '800px' }}>
 
       {/* Header */}
-      <div style={{
-        background: 'linear-gradient(160deg, #3730A3 0%, #4F46E5 60%, #7C3AED 100%)',
-        padding: '24px 20px 32px',
-      }}>
-        <div style={{
-          display: 'flex', justifyContent: 'space-between',
-          alignItems: 'center',
-        }}>
-          <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-              <h1 style={{
-                color: 'white', fontWeight: '800',
-                fontSize: '22px', letterSpacing: '-0.5px',
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '24px' }}>
+        <div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '4px' }}>
+            <h1 style={{ fontSize: '28px', fontWeight: '800', color: '#0F172A' }}>
+              Notifications
+            </h1>
+            {unreadCount > 0 && (
+              <span style={{
+                background: '#DC2626', color: 'white',
+                fontSize: '12px', fontWeight: '700',
+                padding: '2px 10px', borderRadius: '20px',
               }}>
-                Notifications
-              </h1>
-              {unreadCount > 0 && (
-                <span style={{
-                  background: '#EF4444', color: 'white',
-                  fontSize: '11px', fontWeight: '700',
-                  padding: '2px 8px', borderRadius: '20px',
-                }}>
-                  {unreadCount}
-                </span>
-              )}
-            </div>
-            <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: '13px', marginTop: '2px' }}>
-              Stay updated on your activity
-            </p>
+                {unreadCount} new
+              </span>
+            )}
           </div>
-          {unreadCount > 0 && (
-            <button
-              onClick={markAllAsRead}
-              style={{
-                display: 'flex', alignItems: 'center', gap: '6px',
-                background: 'rgba(255,255,255,0.15)',
-                border: '1px solid rgba(255,255,255,0.2)',
-                borderRadius: '12px', padding: '8px 12px',
-                color: 'white', fontSize: '12px',
-                fontWeight: '600', cursor: 'pointer',
-              }}
-            >
-              <CheckCheck size={14} />
-              Mark all read
-            </button>
-          )}
+          <p style={{ fontSize: '14px', color: '#64748B' }}>
+            Stay updated on your orders and activity
+          </p>
         </div>
+        {unreadCount > 0 && (
+          <button
+            onClick={markAllAsRead}
+            style={{
+              display: 'flex', alignItems: 'center', gap: '8px',
+              background: '#EFF6FF', color: '#1E3A8A',
+              border: 'none', borderRadius: '10px',
+              padding: '8px 16px', fontSize: '13px',
+              fontWeight: '600', cursor: 'pointer',
+            }}
+          >
+            <CheckCheck size={16} />
+            Mark all as read
+          </button>
+        )}
+      </div>
+
+      {/* Filter tabs */}
+      <div style={{
+        display: 'flex', gap: '4px',
+        background: 'white', borderRadius: '10px',
+        padding: '4px', border: '1px solid #E2E8F0',
+        width: 'fit-content', marginBottom: '20px',
+      }}>
+        {[
+          { value: 'all', label: 'All' },
+          { value: 'unread', label: 'Unread' },
+          { value: 'read', label: 'Read' },
+        ].map((tab) => (
+          <button
+            key={tab.value}
+            onClick={() => setFilter(tab.value)}
+            style={{
+              padding: '6px 16px', border: 'none',
+              borderRadius: '8px', fontSize: '13px',
+              fontWeight: filter === tab.value ? '700' : '500',
+              background: filter === tab.value ? '#1E3A8A' : 'transparent',
+              color: filter === tab.value ? 'white' : '#64748B',
+              cursor: 'pointer', transition: 'all 0.2s',
+            }}
+          >
+            {tab.label}
+          </button>
+        ))}
       </div>
 
       {/* Notifications */}
-      <div style={{ padding: '16px' }}>
-        {loading ? (
-          <div style={{ textAlign: 'center', padding: '60px 0', color: '#94A3B8', fontSize: '14px' }}>
-            Loading...
-          </div>
-        ) : notifications.length === 0 ? (
-          <div style={{ textAlign: 'center', padding: '60px 0' }}>
-            <div style={{
-              width: '64px', height: '64px',
-              background: '#EEF2FF', borderRadius: '20px',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              margin: '0 auto 16px',
-            }}>
-              <Bell size={28} color="#4F46E5" />
-            </div>
-            <p style={{ fontWeight: '700', color: '#0F172A', marginBottom: '6px' }}>
-              No notifications yet
-            </p>
-            <p style={{ fontSize: '13px', color: '#94A3B8' }}>
-              You're all caught up!
-            </p>
-          </div>
-        ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-            {notifications.map((notif) => {
-              const config = typeConfig[notif.type] || { color: '#64748B', bg: '#F8FAFC', emoji: '🔔' };
-              return (
-                <div
-                  key={notif.id}
-                  style={{
-                    background: 'white',
-                    borderRadius: '18px',
-                    padding: '16px',
-                    boxShadow: '0 2px 12px rgba(0,0,0,0.06)',
-                    display: 'flex', gap: '14px', alignItems: 'flex-start',
-                    borderLeft: notif.is_read ? 'none' : `3px solid ${config.color}`,
-                  }}
-                >
-                  {/* Emoji icon */}
-                  <div style={{
-                    width: '44px', height: '44px',
-                    background: config.bg, borderRadius: '14px',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    flexShrink: 0, fontSize: '20px',
-                  }}>
-                    {config.emoji}
-                  </div>
+      {loading ? (
+        <div style={{ textAlign: 'center', padding: '60px', color: '#94A3B8' }}>
+          Loading...
+        </div>
+      ) : filtered.length === 0 ? (
+        <div style={{
+          textAlign: 'center', padding: '60px',
+          background: 'white', borderRadius: '16px',
+          border: '1px solid #E2E8F0',
+        }}>
+          <Bell size={48} color="#E2E8F0" style={{ margin: '0 auto 16px' }} />
+          <p style={{ fontWeight: '700', fontSize: '16px', color: '#0F172A', marginBottom: '6px' }}>
+            No notifications
+          </p>
+          <p style={{ fontSize: '13px', color: '#94A3B8' }}>You're all caught up!</p>
+        </div>
+      ) : (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+          {filtered.map((notif) => {
+            const config = typeConfig[notif.type] || { color: '#64748B', bg: '#F8FAFC', emoji: '🔔', label: notif.type };
+            return (
+              <div
+                key={notif.id}
+                style={{
+                  background: 'white', borderRadius: '14px',
+                  padding: '16px 20px',
+                  border: notif.is_read ? '1px solid #E2E8F0' : `1px solid ${config.color}30`,
+                  boxShadow: '0 1px 4px rgba(0,0,0,0.04)',
+                  display: 'flex', gap: '14px', alignItems: 'flex-start',
+                  borderLeft: notif.is_read ? '1px solid #E2E8F0' : `4px solid ${config.color}`,
+                }}
+              >
+                <div style={{
+                  width: '44px', height: '44px',
+                  background: config.bg, borderRadius: '12px',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  flexShrink: 0, fontSize: '20px',
+                }}>
+                  {config.emoji}
+                </div>
 
-                  {/* Content */}
-                  <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ flex: 1 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
                     <span style={{
                       fontSize: '11px', fontWeight: '700',
                       color: config.color, background: config.bg,
                       padding: '2px 8px', borderRadius: '20px',
-                      display: 'inline-block', marginBottom: '6px',
                     }}>
-                      {notif.type.replace('_', ' ')}
+                      {config.label}
                     </span>
-                    <p style={{
-                      fontSize: '13px', color: '#0F172A',
-                      lineHeight: '1.5', marginBottom: '6px',
-                      fontWeight: notif.is_read ? '400' : '600',
-                    }}>
-                      {notif.message}
-                    </p>
-                    <p style={{ fontSize: '11px', color: '#94A3B8' }}>
-                      {new Date(notif.created_at).toLocaleString()}
-                    </p>
-                  </div>
-
-                  {/* Actions */}
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', flexShrink: 0 }}>
                     {!notif.is_read && (
-                      <button
-                        onClick={() => markAsRead(notif.id)}
-                        style={{
-                          width: '30px', height: '30px',
-                          background: '#EEF2FF', border: 'none',
-                          borderRadius: '8px', cursor: 'pointer',
-                          display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        }}
-                      >
-                        <Check size={14} color="#4F46E5" />
-                      </button>
+                      <div style={{
+                        width: '6px', height: '6px',
+                        background: config.color, borderRadius: '50%',
+                      }} />
                     )}
+                  </div>
+                  <p style={{
+                    fontSize: '14px', color: '#0F172A',
+                    fontWeight: notif.is_read ? '400' : '600',
+                    lineHeight: '1.5', marginBottom: '4px',
+                  }}>
+                    {notif.message}
+                  </p>
+                  <p style={{ fontSize: '12px', color: '#94A3B8' }}>
+                    {new Date(notif.created_at).toLocaleString()}
+                  </p>
+                </div>
+
+                <div style={{ display: 'flex', gap: '6px', flexShrink: 0 }}>
+                  {!notif.is_read && (
                     <button
-                      onClick={() => deleteNotification(notif.id)}
+                      onClick={() => markAsRead(notif.id)}
                       style={{
-                        width: '30px', height: '30px',
-                        background: '#FEF2F2', border: 'none',
+                        width: '32px', height: '32px',
+                        background: '#EFF6FF', border: 'none',
                         borderRadius: '8px', cursor: 'pointer',
                         display: 'flex', alignItems: 'center', justifyContent: 'center',
                       }}
                     >
-                      <Trash2 size={14} color="#DC2626" />
+                      <Check size={14} color="#1E3A8A" />
                     </button>
-                  </div>
+                  )}
+                  <button
+                    onClick={() => deleteNotification(notif.id)}
+                    style={{
+                      width: '32px', height: '32px',
+                      background: '#FEF2F2', border: 'none',
+                      borderRadius: '8px', cursor: 'pointer',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    }}
+                  >
+                    <Trash2 size={14} color="#DC2626" />
+                  </button>
                 </div>
-              );
-            })}
-          </div>
-        )}
-      </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 }

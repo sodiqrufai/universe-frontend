@@ -2,11 +2,9 @@
 
 import { useEffect, useState } from 'react';
 import api from '@/lib/api';
-import { Wallet, Lock, TrendingUp, ArrowUpRight, Shield } from 'lucide-react';
+import { Wallet, Lock, TrendingUp, ArrowUpRight, Shield, Download } from 'lucide-react';
 
 interface WalletData {
-  id: string;
-  user_id: string;
   balance: number;
   locked_balance: number;
 }
@@ -20,7 +18,6 @@ export default function WalletPage() {
   }, []);
 
   const fetchWallet = async () => {
-    setLoading(true);
     try {
       const res = await api.get('/payments/wallet');
       setWallet(res.data);
@@ -31,176 +28,194 @@ export default function WalletPage() {
     }
   };
 
-  if (loading) {
-    return (
-      <div style={{ textAlign: 'center', padding: '60px 0', color: '#94A3B8' }}>
-        Loading wallet...
-      </div>
-    );
-  }
+  if (loading) return (
+    <div style={{ textAlign: 'center', padding: '60px', color: '#94A3B8' }}>
+      Loading wallet...
+    </div>
+  );
 
   const total = (wallet?.balance ?? 0) + (wallet?.locked_balance ?? 0);
 
+  const recentActivity = [
+    { entity: 'Logo Design Service', activity: 'Payment Received', date: 'Jun 14, 2026', amount: '₦4,500', status: 'PAID' },
+    { entity: 'Math Tutoring', activity: 'Escrow Held', date: 'Jun 13, 2026', amount: '₦2,000', status: 'HELD' },
+    { entity: 'Web Development', activity: 'Payment Released', date: 'Jun 12, 2026', amount: '₦13,500', status: 'RELEASED' },
+  ];
+
   return (
-    <div style={{ background: '#F8FAFC', minHeight: '100vh' }}>
+    <div style={{ maxWidth: '1000px' }}>
 
       {/* Header */}
-      <div style={{
-        background: 'linear-gradient(160deg, #3730A3 0%, #4F46E5 60%, #7C3AED 100%)',
-        padding: '24px 20px 60px',
-      }}>
-        <h1 style={{
-          color: 'white', fontWeight: '800',
-          fontSize: '22px', letterSpacing: '-0.5px',
-          marginBottom: '4px',
-        }}>
-          My Wallet
+      <div style={{ marginBottom: '24px' }}>
+        <h1 style={{ fontSize: '28px', fontWeight: '800', color: '#0F172A', marginBottom: '4px' }}>
+          Overview Analytics
         </h1>
-        <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: '13px' }}>
-          Manage your earnings and balance
+        <p style={{ fontSize: '14px', color: '#64748B' }}>
+          Real-time performance metrics for your academic marketplace portfolio.
         </p>
       </div>
 
-      {/* Main balance card */}
-      <div style={{ padding: '0 16px', marginTop: '-40px', position: 'relative', zIndex: 10 }}>
-        <div style={{
-          background: 'white',
-          borderRadius: '24px',
-          padding: '24px',
-          boxShadow: '0 8px 32px rgba(0,0,0,0.12)',
-          marginBottom: '16px',
-        }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '16px' }}>
-            <div style={{
-              width: '40px', height: '40px',
-              background: '#EEF2FF', borderRadius: '12px',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-            }}>
-              <Wallet size={20} color="#4F46E5" />
-            </div>
-            <span style={{ fontSize: '14px', fontWeight: '600', color: '#64748B' }}>
-              Available Balance
-            </span>
-          </div>
-
-          <p style={{
-            fontSize: '42px', fontWeight: '800',
-            color: '#0F172A', letterSpacing: '-2px',
-            marginBottom: '4px',
+      {/* Stats cards */}
+      <div style={{
+        display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)',
+        gap: '16px', marginBottom: '24px',
+      }}>
+        {[
+          { icon: Wallet, label: 'TOTAL EARNINGS', value: `₦${total.toLocaleString()}`, change: '+12%', color: '#1E3A8A', bg: '#EFF6FF' },
+          { icon: TrendingUp, label: 'AVAILABLE BALANCE', value: `₦${(wallet?.balance ?? 0).toLocaleString()}`, change: 'Stable', color: '#10B981', bg: '#F0FDF4' },
+          { icon: Lock, label: 'IN ESCROW', value: `₦${(wallet?.locked_balance ?? 0).toLocaleString()}`, change: '+4.5%', color: '#6D28D9', bg: '#F5F3FF' },
+          { icon: ArrowUpRight, label: 'PENDING PAYOUTS', value: '₦0', change: 'HOT', color: '#F59E0B', bg: '#FFFBEB' },
+        ].map((stat) => (
+          <div key={stat.label} style={{
+            background: 'white', borderRadius: '14px',
+            padding: '20px', border: '1px solid #E2E8F0',
+            boxShadow: '0 1px 4px rgba(0,0,0,0.04)',
           }}>
-            ₦{wallet?.balance.toLocaleString() ?? '0'}
-          </p>
-          <p style={{ fontSize: '13px', color: '#94A3B8' }}>
-            Ready to withdraw
-          </p>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
+              <div style={{
+                width: '32px', height: '32px',
+                background: stat.bg, borderRadius: '8px',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+              }}>
+                <stat.icon size={16} color={stat.color} />
+              </div>
+              <span style={{
+                fontSize: '11px', fontWeight: '700',
+                color: stat.change.includes('+') ? '#10B981' : '#94A3B8',
+                background: stat.change.includes('+') ? '#F0FDF4' : '#F8FAFC',
+                padding: '2px 8px', borderRadius: '20px',
+              }}>
+                {stat.change}
+              </span>
+            </div>
+            <p style={{ fontSize: '11px', color: '#94A3B8', fontWeight: '600', marginBottom: '4px', letterSpacing: '0.3px' }}>
+              {stat.label}
+            </p>
+            <p style={{ fontSize: '22px', fontWeight: '800', color: '#0F172A' }}>
+              {stat.value}
+            </p>
+          </div>
+        ))}
+      </div>
 
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
+
+        {/* Withdraw card */}
+        <div style={{
+          background: 'linear-gradient(135deg, #1E3A8A 0%, #6D28D9 100%)',
+          borderRadius: '16px', padding: '24px',
+          color: 'white',
+        }}>
+          <p style={{ fontSize: '13px', color: 'rgba(255,255,255,0.6)', marginBottom: '8px' }}>
+            Available to Withdraw
+          </p>
+          <p style={{ fontSize: '40px', fontWeight: '800', letterSpacing: '-1px', marginBottom: '20px' }}>
+            ₦{(wallet?.balance ?? 0).toLocaleString()}
+          </p>
           <button style={{
-            marginTop: '20px',
-            width: '100%',
-            background: '#4F46E5',
-            color: 'white', border: 'none',
-            borderRadius: '14px', padding: '14px',
-            fontSize: '14px', fontWeight: '700',
-            cursor: 'pointer',
-            display: 'flex', alignItems: 'center',
-            justifyContent: 'center', gap: '8px',
+            display: 'flex', alignItems: 'center', gap: '8px',
+            background: 'white', color: '#1E3A8A',
+            border: 'none', borderRadius: '10px',
+            padding: '12px 20px', fontSize: '14px',
+            fontWeight: '700', cursor: 'pointer', width: '100%',
+            justifyContent: 'center',
           }}>
             <ArrowUpRight size={18} />
             Withdraw Funds
           </button>
         </div>
 
-        {/* Stats row */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '16px' }}>
-          {/* Locked */}
-          <div style={{
-            background: 'white', borderRadius: '20px',
-            padding: '18px',
-            boxShadow: '0 2px 12px rgba(0,0,0,0.06)',
-          }}>
-            <div style={{
-              width: '36px', height: '36px',
-              background: '#FFF7ED', borderRadius: '10px',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              marginBottom: '12px',
-            }}>
-              <Lock size={18} color="#EA580C" />
-            </div>
-            <p style={{ fontSize: '11px', color: '#94A3B8', marginBottom: '4px', fontWeight: '600' }}>
-              IN ESCROW
-            </p>
-            <p style={{ fontSize: '20px', fontWeight: '800', color: '#0F172A' }}>
-              ₦{wallet?.locked_balance.toLocaleString() ?? '0'}
-            </p>
-          </div>
-
-          {/* Total */}
-          <div style={{
-            background: 'white', borderRadius: '20px',
-            padding: '18px',
-            boxShadow: '0 2px 12px rgba(0,0,0,0.06)',
-          }}>
-            <div style={{
-              width: '36px', height: '36px',
-              background: '#F0FDF4', borderRadius: '10px',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              marginBottom: '12px',
-            }}>
-              <TrendingUp size={18} color="#16A34A" />
-            </div>
-            <p style={{ fontSize: '11px', color: '#94A3B8', marginBottom: '4px', fontWeight: '600' }}>
-              TOTAL EARNED
-            </p>
-            <p style={{ fontSize: '20px', fontWeight: '800', color: '#0F172A' }}>
-              ₦{total.toLocaleString()}
-            </p>
-          </div>
-        </div>
-
-        {/* How escrow works */}
+        {/* Escrow info */}
         <div style={{
-          background: 'white', borderRadius: '20px',
-          padding: '20px',
-          boxShadow: '0 2px 12px rgba(0,0,0,0.06)',
+          background: 'white', borderRadius: '16px',
+          padding: '24px', border: '1px solid #E2E8F0',
+          boxShadow: '0 1px 4px rgba(0,0,0,0.04)',
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '16px' }}>
-            <div style={{
-              width: '36px', height: '36px',
-              background: '#EEF2FF', borderRadius: '10px',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-            }}>
-              <Shield size={18} color="#4F46E5" />
-            </div>
-            <p style={{ fontWeight: '700', fontSize: '14px', color: '#0F172A' }}>
+            <Shield size={20} color="#1E3A8A" />
+            <p style={{ fontWeight: '700', fontSize: '15px', color: '#0F172A' }}>
               How Escrow Works
             </p>
           </div>
-
           {[
-            { step: '1', text: 'Buyer places order and pays' },
-            { step: '2', text: 'Money locked in escrow safely' },
-            { step: '3', text: 'You deliver the work or product' },
-            { step: '4', text: 'Buyer confirms delivery' },
-            { step: '5', text: 'Money released to your wallet (90%)' },
-          ].map((item) => (
-            <div key={item.step} style={{
-              display: 'flex', alignItems: 'center',
-              gap: '12px', marginBottom: '12px',
+            '1. Buyer pays via Paystack',
+            '2. Funds locked in escrow',
+            '3. You deliver the work',
+            '4. Buyer confirms delivery',
+            '5. 90% released to your wallet',
+          ].map((step) => (
+            <div key={step} style={{
+              display: 'flex', alignItems: 'center', gap: '10px',
+              padding: '6px 0', borderBottom: '1px solid #F8FAFC',
             }}>
               <div style={{
-                width: '24px', height: '24px',
-                background: '#EEF2FF', borderRadius: '50%',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                flexShrink: 0,
-              }}>
-                <span style={{ fontSize: '11px', fontWeight: '800', color: '#4F46E5' }}>
-                  {item.step}
-                </span>
-              </div>
-              <p style={{ fontSize: '13px', color: '#64748B' }}>{item.text}</p>
+                width: '6px', height: '6px',
+                background: '#1E3A8A', borderRadius: '50%', flexShrink: 0,
+              }} />
+              <p style={{ fontSize: '13px', color: '#64748B' }}>{step}</p>
             </div>
           ))}
         </div>
+      </div>
+
+      {/* Recent Activity */}
+      <div style={{
+        background: 'white', borderRadius: '16px',
+        border: '1px solid #E2E8F0',
+        boxShadow: '0 1px 4px rgba(0,0,0,0.04)',
+        marginTop: '24px', overflow: 'hidden',
+      }}>
+        <div style={{
+          display: 'flex', justifyContent: 'space-between',
+          alignItems: 'center', padding: '16px 20px',
+          borderBottom: '1px solid #F1F5F9',
+        }}>
+          <p style={{ fontWeight: '700', fontSize: '15px', color: '#0F172A' }}>
+            Recent Activity
+          </p>
+          <button style={{
+            display: 'flex', alignItems: 'center', gap: '6px',
+            background: 'none', border: 'none', cursor: 'pointer',
+            fontSize: '13px', fontWeight: '600', color: '#1E3A8A',
+          }}>
+            <Download size={14} /> Download Report
+          </button>
+        </div>
+
+        {/* Table header */}
+        <div style={{
+          display: 'grid', gridTemplateColumns: '2fr 2fr 1fr 1fr 1fr',
+          padding: '10px 20px', background: '#F8FAFC',
+          borderBottom: '1px solid #E2E8F0',
+        }}>
+          {['ENTITY', 'ACTIVITY', 'DATE', 'AMOUNT', 'STATUS'].map((h) => (
+            <p key={h} style={{ fontSize: '11px', fontWeight: '700', color: '#94A3B8' }}>
+              {h}
+            </p>
+          ))}
+        </div>
+
+        {recentActivity.map((item, i) => (
+          <div key={i} style={{
+            display: 'grid', gridTemplateColumns: '2fr 2fr 1fr 1fr 1fr',
+            padding: '14px 20px', alignItems: 'center',
+            borderBottom: i < recentActivity.length - 1 ? '1px solid #F8FAFC' : 'none',
+          }}>
+            <p style={{ fontWeight: '600', fontSize: '13px', color: '#0F172A' }}>{item.entity}</p>
+            <p style={{ fontSize: '13px', color: '#64748B' }}>{item.activity}</p>
+            <p style={{ fontSize: '12px', color: '#94A3B8' }}>{item.date}</p>
+            <p style={{ fontWeight: '700', fontSize: '13px', color: '#1E3A8A' }}>{item.amount}</p>
+            <span style={{
+              fontSize: '11px', fontWeight: '700',
+              color: item.status === 'PAID' ? '#10B981' : item.status === 'HELD' ? '#D97706' : '#6D28D9',
+              background: item.status === 'PAID' ? '#F0FDF4' : item.status === 'HELD' ? '#FFFBEB' : '#F5F3FF',
+              padding: '3px 10px', borderRadius: '20px',
+              width: 'fit-content',
+            }}>
+              {item.status}
+            </span>
+          </div>
+        ))}
       </div>
     </div>
   );

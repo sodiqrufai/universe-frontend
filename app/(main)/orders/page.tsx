@@ -4,13 +4,9 @@ import { useEffect, useState } from 'react';
 import api from '@/lib/api';
 import { useAuthStore } from '@/store/authStore';
 import {
-  Package,
-  Clock,
-  CheckCircle,
-  XCircle,
-  AlertTriangle,
-  ChevronRight,
-  ArrowUpDown,
+  Package, Clock, CheckCircle, XCircle,
+  AlertTriangle, ChevronRight, Search,
+  Filter, ArrowUpDown,
 } from 'lucide-react';
 
 interface Order {
@@ -29,7 +25,7 @@ const statusConfig: Record<string, { color: string; bg: string; icon: any; label
   PAID: { color: '#2563EB', bg: '#EFF6FF', icon: CheckCircle, label: 'Paid' },
   IN_PROGRESS: { color: '#4F46E5', bg: '#EEF2FF', icon: Package, label: 'In Progress' },
   DELIVERED: { color: '#7C3AED', bg: '#F5F3FF', icon: Package, label: 'Delivered' },
-  COMPLETED: { color: '#16A34A', bg: '#F0FDF4', icon: CheckCircle, label: 'Completed' },
+  COMPLETED: { color: '#10B981', bg: '#F0FDF4', icon: CheckCircle, label: 'Completed' },
   CANCELLED: { color: '#DC2626', bg: '#FEF2F2', icon: XCircle, label: 'Cancelled' },
   DISPUTED: { color: '#EA580C', bg: '#FFF7ED', icon: AlertTriangle, label: 'Disputed' },
 };
@@ -40,6 +36,7 @@ export default function OrdersPage() {
   const [loading, setLoading] = useState(true);
   const [role, setRole] = useState<'buyer' | 'seller'>('buyer');
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+  const [search, setSearch] = useState('');
 
   useEffect(() => {
     fetchOrders();
@@ -75,54 +72,44 @@ export default function OrdersPage() {
       setSelectedOrder(null);
       fetchOrders();
     } catch (err: any) {
-      alert(err.response?.data?.message || 'Failed to update status');
+      alert(err.response?.data?.message || 'Failed');
     }
   };
 
+  const filtered = orders.filter((o) =>
+    o.listing?.title?.toLowerCase().includes(search.toLowerCase()) ||
+    o.buyer?.name?.toLowerCase().includes(search.toLowerCase()) ||
+    o.seller?.name?.toLowerCase().includes(search.toLowerCase())
+  );
+
   return (
-    <div style={{ background: '#F8FAFC', minHeight: '100vh' }}>
+    <div style={{ maxWidth: '1200px' }}>
 
       {/* Header */}
-      <div style={{
-        background: 'linear-gradient(160deg, #3730A3 0%, #4F46E5 60%, #7C3AED 100%)',
-        padding: '24px 20px 32px',
-      }}>
-        <div style={{
-          display: 'flex', justifyContent: 'space-between',
-          alignItems: 'center', marginBottom: '16px',
-        }}>
-          <div>
-            <h1 style={{
-              color: 'white', fontWeight: '800',
-              fontSize: '22px', letterSpacing: '-0.5px',
-            }}>
-              My Orders
-            </h1>
-            <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: '13px', marginTop: '2px' }}>
-              {orders.length} order{orders.length !== 1 ? 's' : ''} found
-            </p>
-          </div>
-          <ArrowUpDown size={20} color="rgba(255,255,255,0.6)" />
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '24px' }}>
+        <div>
+          <h1 style={{ fontSize: '28px', fontWeight: '800', color: '#0F172A', marginBottom: '4px' }}>
+            My Orders
+          </h1>
+          <p style={{ fontSize: '14px', color: '#64748B' }}>
+            Track and manage all your campus orders
+          </p>
         </div>
-
-        {/* Role toggle */}
         {(user?.role === 'SELLER' || user?.role === 'UNIVERSAL') && (
           <div style={{
-            background: 'rgba(255,255,255,0.1)',
-            borderRadius: '12px',
-            padding: '4px',
-            display: 'flex',
+            display: 'flex', background: 'white',
+            border: '1px solid #E2E8F0', borderRadius: '10px',
+            overflow: 'hidden',
           }}>
             {(['buyer', 'seller'] as const).map((r) => (
               <button
                 key={r}
                 onClick={() => setRole(r)}
                 style={{
-                  flex: 1, padding: '8px',
-                  borderRadius: '10px', border: 'none',
-                  background: role === r ? 'white' : 'transparent',
-                  color: role === r ? '#4F46E5' : 'rgba(255,255,255,0.7)',
-                  fontWeight: '700', fontSize: '13px',
+                  padding: '8px 20px', border: 'none',
+                  background: role === r ? '#1E3A8A' : 'white',
+                  color: role === r ? 'white' : '#64748B',
+                  fontWeight: '600', fontSize: '13px',
                   cursor: 'pointer', textTransform: 'capitalize',
                   transition: 'all 0.2s',
                 }}
@@ -134,23 +121,102 @@ export default function OrdersPage() {
         )}
       </div>
 
-      {/* Orders list */}
-      <div style={{ padding: '16px' }}>
+      {/* Stats row */}
+      <div style={{
+        display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)',
+        gap: '16px', marginBottom: '24px',
+      }}>
+        {[
+          { label: 'Total Orders', value: orders.length, color: '#1E3A8A', bg: '#EFF6FF' },
+          { label: 'Completed', value: orders.filter(o => o.status === 'COMPLETED').length, color: '#10B981', bg: '#F0FDF4' },
+          { label: 'Pending', value: orders.filter(o => o.status === 'PENDING').length, color: '#D97706', bg: '#FFFBEB' },
+          { label: 'Disputed', value: orders.filter(o => o.status === 'DISPUTED').length, color: '#DC2626', bg: '#FEF2F2' },
+        ].map((stat) => (
+          <div key={stat.label} style={{
+            background: 'white', borderRadius: '14px',
+            padding: '16px 20px', border: '1px solid #E2E8F0',
+            boxShadow: '0 1px 4px rgba(0,0,0,0.04)',
+          }}>
+            <p style={{ fontSize: '12px', color: '#94A3B8', fontWeight: '600', marginBottom: '6px' }}>
+              {stat.label}
+            </p>
+            <p style={{ fontSize: '28px', fontWeight: '800', color: stat.color }}>
+              {stat.value}
+            </p>
+          </div>
+        ))}
+      </div>
+
+      {/* Search + filter */}
+      <div style={{
+        display: 'flex', gap: '10px', marginBottom: '16px',
+      }}>
+        <div style={{
+          display: 'flex', alignItems: 'center', gap: '8px',
+          background: 'white', border: '1px solid #E2E8F0',
+          borderRadius: '10px', padding: '10px 14px', flex: 1,
+        }}>
+          <Search size={15} color="#94A3B8" />
+          <input
+            type="text" value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Search orders..."
+            style={{ border: 'none', background: 'none', fontSize: '14px', flex: 1 }}
+          />
+        </div>
+        <button style={{
+          display: 'flex', alignItems: 'center', gap: '8px',
+          background: 'white', border: '1px solid #E2E8F0',
+          borderRadius: '10px', padding: '10px 16px',
+          fontSize: '13px', fontWeight: '600', color: '#64748B',
+          cursor: 'pointer',
+        }}>
+          <Filter size={14} /> Filter
+        </button>
+        <button style={{
+          display: 'flex', alignItems: 'center', gap: '8px',
+          background: 'white', border: '1px solid #E2E8F0',
+          borderRadius: '10px', padding: '10px 16px',
+          fontSize: '13px', fontWeight: '600', color: '#64748B',
+          cursor: 'pointer',
+        }}>
+          <ArrowUpDown size={14} /> Sort
+        </button>
+      </div>
+
+      {/* Orders table */}
+      <div style={{
+        background: 'white', borderRadius: '16px',
+        border: '1px solid #E2E8F0',
+        boxShadow: '0 1px 4px rgba(0,0,0,0.04)',
+        overflow: 'hidden',
+      }}>
+        {/* Table header */}
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: '3fr 1fr 1fr 1fr 1fr',
+          padding: '12px 20px',
+          background: '#F8FAFC',
+          borderBottom: '1px solid #E2E8F0',
+        }}>
+          {['Item', 'Amount', 'Status', 'Date', 'Action'].map((h) => (
+            <p key={h} style={{
+              fontSize: '11px', fontWeight: '700',
+              color: '#94A3B8', letterSpacing: '0.5px',
+            }}>
+              {h}
+            </p>
+          ))}
+        </div>
+
         {loading ? (
-          <div style={{ textAlign: 'center', padding: '60px 0', color: '#94A3B8', fontSize: '14px' }}>
+          <div style={{ textAlign: 'center', padding: '40px', color: '#94A3B8' }}>
             Loading orders...
           </div>
-        ) : orders.length === 0 ? (
-          <div style={{ textAlign: 'center', padding: '60px 0' }}>
-            <div style={{
-              width: '64px', height: '64px',
-              background: '#EEF2FF', borderRadius: '20px',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              margin: '0 auto 16px',
-            }}>
-              <Package size={28} color="#4F46E5" />
-            </div>
-            <p style={{ fontWeight: '700', color: '#0F172A', marginBottom: '6px' }}>
+        ) : filtered.length === 0 ? (
+          <div style={{ textAlign: 'center', padding: '60px 20px' }}>
+            <div style={{ fontSize: '48px', marginBottom: '12px' }}>📦</div>
+            <p style={{ fontWeight: '700', fontSize: '16px', color: '#0F172A', marginBottom: '6px' }}>
               No orders yet
             </p>
             <p style={{ fontSize: '13px', color: '#94A3B8' }}>
@@ -158,199 +224,199 @@ export default function OrdersPage() {
             </p>
           </div>
         ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-            {orders.map((order) => {
-              const config = statusConfig[order.status] || statusConfig.PENDING;
-              const StatusIcon = config.icon;
-              return (
-                <div
-                  key={order.id}
-                  onClick={() => setSelectedOrder(order)}
-                  style={{
-                    background: 'white',
-                    borderRadius: '20px',
-                    padding: '16px',
-                    boxShadow: '0 2px 12px rgba(0,0,0,0.06)',
-                    cursor: 'pointer',
-                    display: 'flex',
-                    gap: '14px',
-                    alignItems: 'center',
-                  }}
-                >
-                  {/* Status icon */}
+          filtered.map((order, i) => {
+            const config = statusConfig[order.status] || statusConfig.PENDING;
+            const StatusIcon = config.icon;
+            return (
+              <div
+                key={order.id}
+                style={{
+                  display: 'grid',
+                  gridTemplateColumns: '3fr 1fr 1fr 1fr 1fr',
+                  padding: '16px 20px',
+                  borderBottom: i < filtered.length - 1 ? '1px solid #F8FAFC' : 'none',
+                  alignItems: 'center',
+                  cursor: 'pointer',
+                  transition: 'background 0.15s',
+                }}
+                onMouseEnter={(e) => (e.currentTarget.style.background = '#F8FAFC')}
+                onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
+                onClick={() => setSelectedOrder(order)}
+              >
+                {/* Item */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                   <div style={{
-                    width: '48px', height: '48px',
-                    background: config.bg,
-                    borderRadius: '14px',
+                    width: '40px', height: '40px',
+                    background: config.bg, borderRadius: '10px',
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
                     flexShrink: 0,
                   }}>
-                    <StatusIcon size={22} color={config.color} />
+                    <StatusIcon size={18} color={config.color} />
                   </div>
-
-                  {/* Content */}
-                  <div style={{ flex: 1, minWidth: 0 }}>
+                  <div>
                     <p style={{
-                      fontWeight: '700', fontSize: '14px',
-                      color: '#0F172A', marginBottom: '4px',
+                      fontWeight: '600', fontSize: '14px', color: '#0F172A',
+                      marginBottom: '2px',
                       overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+                      maxWidth: '200px',
                     }}>
                       {order.listing?.title}
                     </p>
-                    <p style={{ fontSize: '12px', color: '#64748B', marginBottom: '6px' }}>
+                    <p style={{ fontSize: '12px', color: '#94A3B8' }}>
                       {role === 'buyer' ? `Seller: ${order.seller?.name}` : `Buyer: ${order.buyer?.name}`}
                     </p>
-                    <span style={{
-                      fontSize: '11px', fontWeight: '600',
-                      color: config.color, background: config.bg,
-                      padding: '3px 10px', borderRadius: '20px',
-                    }}>
-                      {config.label}
-                    </span>
                   </div>
-
-                  {/* Amount + arrow */}
-                  <div style={{ textAlign: 'right', flexShrink: 0 }}>
-                    <p style={{
-                      fontWeight: '800', fontSize: '15px',
-                      color: '#4F46E5', marginBottom: '4px',
-                    }}>
-                      ₦{order.amount.toLocaleString()}
-                    </p>
-                    <p style={{ fontSize: '11px', color: '#94A3B8' }}>
-                      {new Date(order.created_at).toLocaleDateString()}
-                    </p>
-                  </div>
-
-                  <ChevronRight size={16} color="#CBD5E1" />
                 </div>
-              );
-            })}
-          </div>
+
+                {/* Amount */}
+                <p style={{ fontWeight: '700', fontSize: '14px', color: '#1E3A8A' }}>
+                  ₦{order.amount.toLocaleString()}
+                </p>
+
+                {/* Status */}
+                <span style={{
+                  display: 'inline-flex', alignItems: 'center', gap: '4px',
+                  fontSize: '11px', fontWeight: '700',
+                  color: config.color, background: config.bg,
+                  padding: '4px 10px', borderRadius: '20px',
+                  width: 'fit-content',
+                }}>
+                  {config.label}
+                </span>
+
+                {/* Date */}
+                <p style={{ fontSize: '12px', color: '#94A3B8' }}>
+                  {new Date(order.created_at).toLocaleDateString()}
+                </p>
+
+                {/* Action */}
+                <ChevronRight size={16} color="#CBD5E1" />
+              </div>
+            );
+          })
         )}
       </div>
 
-      {/* Order detail bottom sheet */}
+      {/* Order detail modal */}
       {selectedOrder && (
         <div
           style={{
             position: 'fixed', inset: 0,
-            background: 'rgba(0,0,0,0.5)',
-            display: 'flex', alignItems: 'flex-end',
+            background: 'rgba(0,0,0,0.4)',
+            display: 'flex', alignItems: 'center',
             justifyContent: 'center', zIndex: 200,
+            padding: '24px',
           }}
           onClick={() => setSelectedOrder(null)}
         >
           <div
             style={{
-              background: 'white',
-              borderRadius: '28px 28px 0 0',
-              padding: '24px 20px 40px',
-              width: '100%', maxWidth: '680px',
+              background: 'white', borderRadius: '20px',
+              padding: '28px', width: '100%', maxWidth: '480px',
+              boxShadow: '0 24px 64px rgba(0,0,0,0.15)',
             }}
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Handle */}
-            <div style={{
-              width: '40px', height: '4px',
-              background: '#E2E8F0', borderRadius: '2px',
-              margin: '0 auto 20px',
-            }} />
-
-            <h2 style={{
-              fontWeight: '800', fontSize: '18px',
-              color: '#0F172A', marginBottom: '4px',
-            }}>
-              {selectedOrder.listing?.title}
-            </h2>
-            <p style={{ fontSize: '13px', color: '#64748B', marginBottom: '20px' }}>
-              Order placed on {new Date(selectedOrder.created_at).toLocaleDateString()}
-            </p>
-
-            {/* Details */}
-            {[
-              { label: 'Buyer', value: selectedOrder.buyer?.name },
-              { label: 'Seller', value: selectedOrder.seller?.name },
-              { label: 'Amount', value: `₦${selectedOrder.amount.toLocaleString()}` },
-              { label: 'Status', value: statusConfig[selectedOrder.status]?.label },
-            ].map((item) => (
-              <div key={item.label} style={{
-                display: 'flex', justifyContent: 'space-between',
-                alignItems: 'center', padding: '12px 0',
-                borderBottom: '1px solid #F1F5F9',
-              }}>
-                <span style={{ fontSize: '13px', color: '#64748B' }}>{item.label}</span>
-                <span style={{ fontSize: '13px', fontWeight: '700', color: '#0F172A' }}>
-                  {item.value}
-                </span>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '20px' }}>
+              <div>
+                <h2 style={{ fontWeight: '800', fontSize: '18px', color: '#0F172A', marginBottom: '4px' }}>
+                  Order Details
+                </h2>
+                <p style={{ fontSize: '12px', color: '#94A3B8' }}>
+                  {new Date(selectedOrder.created_at).toLocaleString()}
+                </p>
               </div>
-            ))}
+              <span style={{
+                fontSize: '12px', fontWeight: '700',
+                color: statusConfig[selectedOrder.status]?.color,
+                background: statusConfig[selectedOrder.status]?.bg,
+                padding: '6px 14px', borderRadius: '20px',
+                height: 'fit-content',
+              }}>
+                {statusConfig[selectedOrder.status]?.label}
+              </span>
+            </div>
 
-            {/* Actions */}
-            <div style={{ marginTop: '20px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+            <div style={{
+              background: '#F8FAFC', borderRadius: '12px',
+              padding: '16px', marginBottom: '20px',
+            }}>
+              <p style={{ fontWeight: '700', fontSize: '15px', color: '#0F172A', marginBottom: '12px' }}>
+                {selectedOrder.listing?.title}
+              </p>
+              {[
+                { label: 'Buyer', value: selectedOrder.buyer?.name },
+                { label: 'Seller', value: selectedOrder.seller?.name },
+                { label: 'Amount', value: `₦${selectedOrder.amount.toLocaleString()}` },
+              ].map((item) => (
+                <div key={item.label} style={{
+                  display: 'flex', justifyContent: 'space-between',
+                  padding: '8px 0',
+                  borderBottom: '1px solid #E2E8F0',
+                }}>
+                  <span style={{ fontSize: '13px', color: '#64748B' }}>{item.label}</span>
+                  <span style={{ fontSize: '13px', fontWeight: '700', color: '#0F172A' }}>
+                    {item.value}
+                  </span>
+                </div>
+              ))}
+            </div>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
               {role === 'buyer' && selectedOrder.status === 'PENDING' && (
                 <button
                   onClick={() => handlePayment(selectedOrder.id)}
                   style={{
-                    width: '100%', background: '#4F46E5',
-                    color: 'white', border: 'none',
-                    borderRadius: '14px', padding: '16px',
-                    fontSize: '15px', fontWeight: '700', cursor: 'pointer',
+                    width: '100%', background: '#1E3A8A', color: 'white',
+                    border: 'none', borderRadius: '12px', padding: '14px',
+                    fontSize: '14px', fontWeight: '700', cursor: 'pointer',
                   }}
                 >
                   Pay Now — ₦{selectedOrder.amount.toLocaleString()}
                 </button>
               )}
-
               {role === 'buyer' && selectedOrder.status === 'DELIVERED' && (
                 <button
                   onClick={() => handleUpdateStatus(selectedOrder.id, 'COMPLETED')}
                   style={{
-                    width: '100%', background: '#16A34A',
-                    color: 'white', border: 'none',
-                    borderRadius: '14px', padding: '16px',
-                    fontSize: '15px', fontWeight: '700', cursor: 'pointer',
+                    width: '100%', background: '#10B981', color: 'white',
+                    border: 'none', borderRadius: '12px', padding: '14px',
+                    fontSize: '14px', fontWeight: '700', cursor: 'pointer',
                   }}
                 >
-                  Confirm Delivery
+                  Confirm Delivery & Release Payment
                 </button>
               )}
-
               {role === 'seller' && selectedOrder.status === 'PAID' && (
                 <button
                   onClick={() => handleUpdateStatus(selectedOrder.id, 'DELIVERED')}
                   style={{
-                    width: '100%', background: '#7C3AED',
-                    color: 'white', border: 'none',
-                    borderRadius: '14px', padding: '16px',
-                    fontSize: '15px', fontWeight: '700', cursor: 'pointer',
+                    width: '100%', background: '#6D28D9', color: 'white',
+                    border: 'none', borderRadius: '12px', padding: '14px',
+                    fontSize: '14px', fontWeight: '700', cursor: 'pointer',
                   }}
                 >
                   Mark as Delivered
                 </button>
               )}
-
               {selectedOrder.status === 'PENDING' && (
                 <button
                   onClick={() => handleUpdateStatus(selectedOrder.id, 'CANCELLED')}
                   style={{
-                    width: '100%', background: '#FEF2F2',
-                    color: '#DC2626', border: 'none',
-                    borderRadius: '14px', padding: '16px',
-                    fontSize: '15px', fontWeight: '700', cursor: 'pointer',
+                    width: '100%', background: '#FEF2F2', color: '#DC2626',
+                    border: 'none', borderRadius: '12px', padding: '14px',
+                    fontSize: '14px', fontWeight: '700', cursor: 'pointer',
                   }}
                 >
                   Cancel Order
                 </button>
               )}
-
               <button
                 onClick={() => setSelectedOrder(null)}
                 style={{
-                  width: '100%', background: '#F8FAFC',
-                  color: '#64748B', border: 'none',
-                  borderRadius: '14px', padding: '14px',
-                  fontSize: '14px', fontWeight: '600', cursor: 'pointer',
+                  width: '100%', background: '#F8FAFC', color: '#64748B',
+                  border: 'none', borderRadius: '12px', padding: '12px',
+                  fontSize: '13px', fontWeight: '600', cursor: 'pointer',
                 }}
               >
                 Close
